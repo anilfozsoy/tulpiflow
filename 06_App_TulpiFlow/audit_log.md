@@ -61,3 +61,24 @@
      - PWA (manifest + service worker) ve Capacitor tek tıkla ücretsiz Android APK derleme scripti (`build_apk.bat`).
 - **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
 ---
+
+## [TIMESTAMP: 2026-10-02 02:52:30 UTC+3]
+- **Execution Model:** Gemini 3.8 Flash (High)
+- **Prompt Hash / Context ID:** FIREBASE-SYNC-GITHUB-ACTIONS-APK-03
+- **Target Files Affected:**
+  - `06_App_TulpiFlow/tulpiflow_app/index.html` (Updated: Firebase v10 compat CDN scripts added)
+  - `06_App_TulpiFlow/tulpiflow_app/app.js` (Updated: Cloud Firestore onSnapshot/setDoc real-time sync integrated)
+  - `06_App_TulpiFlow/tulpiflow_app/www/index.html` (Updated: Synchronized)
+  - `06_App_TulpiFlow/tulpiflow_app/www/app.js` (Updated: Synchronized)
+  - `06_App_TulpiFlow/tulpiflow_app/.github/workflows/build-apk.yml` (Created: Cloud APK build workflow)
+  - `.github/workflows/build-apk.yml` (Created: Root level workflow)
+  - `06_App_TulpiFlow/tulpiflow_app/android/...` (Updated via `npx cap sync android`)
+  - `06_App_TulpiFlow/audit_log.md` (Appended)
+- **Action Summary:**
+  1. `index.html` içerisine Firebase v10 compat SDK'ları (`firebase-app-compat`, `firebase-firestore-compat`, `firebase-analytics-compat`) dahil edildi.
+  2. `app.js` içerisindeki veriler Cloud Firestore (`tulpiflow_users`, `tasks`, `app_data/curriculum`, `app_data/mistakes`, `app_data/sprints`) koleksiyonlarına bağlandı.
+  3. `onSnapshot` gerçek zamanlı dinleyicileri kurularak Anıl (`7799`) ve Fadime (`2026`) arasındaki görev delege etme, S.O.S. yardım çağrısı, tebrik notları ve ders tamamlama süreçleri canlı eşzamanlandı.
+  4. GitHub Actions iş akışı (`build-apk.yml`) oluşturuldu; Ubuntu üzerinde JDK 21 ve Gradle ile derleme yapıp APK çıktısını GitHub Artifacts olarak sunacak konfigürasyon yazıldı.
+  5. `npx cap sync android` komutu işletilerek güncel kodlar Capacitor Android projesine aktarıldı.
+- **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
+---

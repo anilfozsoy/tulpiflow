@@ -1,194 +1,243 @@
 /* ==========================================================================
    TULPIFLOW CORE ENGINE — APP.JS
-   Asymmetric Co-Working, Speech Recognition, Web Audio Synthesizer,
-   Celebration Confetti, Local-First State Management
+   Real-Time Cloud Firestore Sync, Asymmetric Co-Working, Speech Recognition,
+   Web Audio Synthesizer, Celebration Confetti Engine
    ========================================================================== */
 
 (function () {
   'use strict';
 
   // =========================================================================
-  // 1. STATE & PERSISTENCE LAYER (LOCAL-FIRST)
+  // 1. FIREBASE CONFIGURATION & FIRESTORE INITIALIZATION
   // =========================================================================
-  const STORAGE_KEY = 'tulpiflow_v1_state';
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNeAHfS-x02_9MZJGkMjCPV3RavXpQtWM",
+    authDomain: "tulpiflow.firebaseapp.com",
+    projectId: "tulpiflow",
+    storageBucket: "tulpiflow.firebasestorage.app",
+    messagingSenderId: "581034287559",
+    appId: "1:581034287559:web:856bd292ce9df806ee39e2",
+    measurementId: "G-F0PW1TK2G6"
+  };
+
+  let db = null;
+  let isFirestoreConnected = false;
   const AUTH_KEY = 'tulpiflow_auth_device';
 
-  const DEFAULT_STATE = {
-    users: {
-      fadime: {
-        name: 'Fadime',
-        title: 'YKS 2026 Hazırlık & Derece Adayı',
-        role: 'student',
-        avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=FadimeTulpi',
-        streakDays: 14,
-        todayFocusMinutes: 125,
-        lastAction: 'Türev: Geometrik Yorum tamamlandı',
-        sosActive: false,
-        sosMessage: ''
-      },
-      anil: {
-        name: 'Anıl',
-        title: 'Sistem Mimarı, Geliştirici & Mentör',
-        role: 'mentor',
-        avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=AnilTech',
-        streakDays: 28,
-        todayFocusMinutes: 255,
-        lastAction: 'DDIA LSM-Tree & WAL analiz sprinti tamamlandı'
+  // Initialize Firebase App & Firestore via Compat SDK
+  try {
+    if (typeof firebase !== 'undefined') {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
       }
+      db = firebase.firestore();
+      // Enable offline persistence in Firestore
+      try {
+        db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+          if (err.code === 'failed-precondition') {
+            console.warn('Firestore persistence: multiple tabs open.');
+          } else if (err.code === 'unimplemented') {
+            console.warn('Firestore persistence not supported in this environment.');
+          }
+        });
+      } catch (pErr) {
+        console.warn('Persistence config skipped:', pErr);
+      }
+      isFirestoreConnected = true;
+    } else {
+      console.warn('Firebase SDK yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
+    }
+  } catch (err) {
+    console.error('Firebase ilklendirme hatası:', err);
+  }
+
+  // =========================================================================
+  // 2. DEFAULT SEED STATE (USED TO INITIALIZE FIRESTORE IF EMPTY)
+  // =========================================================================
+  const INITIAL_USERS = {
+    fadime: {
+      name: 'Fadime',
+      title: 'YKS 2026 Hazırlık & Derece Adayı',
+      role: 'student',
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=FadimeTulpi',
+      streakDays: 14,
+      todayFocusMinutes: 125,
+      lastAction: 'Türev: Geometrik Yorum tamamlandı',
+      statusText: '🟡 Serbest Çalışma',
+      sosActive: false,
+      sosMessage: ''
     },
-    topicTree: [
-      {
-        id: 'top-1',
-        category: 'matematik',
-        categoryLabel: 'TYT-AYT Matematik',
-        title: 'Türev ve Uygulamaları',
-        subtopics: [
-          { id: 'sub-1-1', title: 'Limit ve Türev Tanımı', completed: true, completedAt: '2026-09-28' },
-          { id: 'sub-1-2', title: 'Türev Alma Kuralları', completed: true, completedAt: '2026-09-30' },
-          { id: 'sub-1-3', title: 'Geometrik Yorum & Teğet Denklemi', completed: true, completedAt: '2026-10-01' },
-          { id: 'sub-1-4', title: 'Maksimum - Minimum Problemleri', completed: false }
-        ]
-      },
-      {
-        id: 'top-2',
-        category: 'matematik',
-        categoryLabel: 'TYT-AYT Matematik',
-        title: 'İntegral ve Alan Hesabı',
-        subtopics: [
-          { id: 'sub-2-1', title: 'Belirsiz İntegral ve Temel Kurallar', completed: false },
-          { id: 'sub-2-2', title: 'Değişken Değiştirme Yöntemi', completed: false },
-          { id: 'sub-2-3', title: 'Belirli İntegral Özellikleri', completed: false },
-          { id: 'sub-2-4', title: 'Eğriler Arasında Kalan Alan Hesabı', completed: false }
-        ]
-      },
-      {
-        id: 'top-3',
-        category: 'matematik',
-        categoryLabel: 'TYT-AYT Matematik',
-        title: 'Fonksiyonlar ve Grafikler',
-        subtopics: [
-          { id: 'sub-3-1', title: 'Fonksiyon Tanım ve Değer Kümesi', completed: true, completedAt: '2026-09-15' },
-          { id: 'sub-3-2', title: 'Birebir ve Örten Fonksiyonlar', completed: true, completedAt: '2026-09-18' },
-          { id: 'sub-3-3', title: 'Bileşke ve Ters Fonksiyon', completed: true, completedAt: '2026-09-20' },
-          { id: 'sub-3-4', title: 'Fonksiyon Grafiklerinde Öteleme', completed: false }
-        ]
-      },
-      {
-        id: 'top-4',
-        category: 'matematik',
-        categoryLabel: 'TYT-AYT Matematik',
-        title: 'Trigonometri',
-        subtopics: [
-          { id: 'sub-4-1', title: 'Birim Çember ve Esas Ölçü', completed: true, completedAt: '2026-09-10' },
-          { id: 'sub-4-2', title: 'Toplam - Fark Formülleri', completed: false },
-          { id: 'sub-4-3', title: 'Yarım Açı Formülleri', completed: false },
-          { id: 'sub-4-4', title: 'Trigonometrik Denklemler', completed: false }
-        ]
-      },
-      {
-        id: 'top-5',
-        category: 'geometri',
-        categoryLabel: 'Geometri',
-        title: 'Analitik Geometri',
-        subtopics: [
-          { id: 'sub-5-1', title: 'Noktanın Analitik İncelenmesi', completed: true, completedAt: '2026-09-12' },
-          { id: 'sub-5-2', title: 'Doğrunun Eğimi ve Grafiği', completed: true, completedAt: '2026-09-22' },
-          { id: 'sub-5-3', title: 'İki Doğru Arasındaki Açı & Uzaklık', completed: false },
-          { id: 'sub-5-4', title: 'Çemberin Analitik İncelenmesi', completed: false }
-        ]
-      },
-      {
-        id: 'top-6',
-        category: 'geometri',
-        categoryLabel: 'Geometri',
-        title: 'Üçgenler ve Çokgenler',
-        subtopics: [
-          { id: 'sub-6-1', title: 'Üçgende Açılar ve Kenar Bağıntıları', completed: true, completedAt: '2026-09-05' },
-          { id: 'sub-6-2', title: 'Benzerlik Teoremleri', completed: true, completedAt: '2026-09-14' },
-          { id: 'sub-6-3', title: 'Dörtgenler ve Özel Çokgenler', completed: false }
-        ]
-      },
-      {
-        id: 'top-7',
-        category: 'fen',
-        categoryLabel: 'Fizik & Kimya',
-        title: 'Mekanik & Elektrik',
-        subtopics: [
-          { id: 'sub-7-1', title: 'Bağıl Hareket ve Newton Yasaları', completed: true, completedAt: '2026-09-25' },
-          { id: 'sub-7-2', title: 'İş, Güç ve Enerji', completed: false },
-          { id: 'sub-7-3', title: 'Elektriksel Potansiyel ve Alan', completed: false }
-        ]
-      }
-    ],
-    tasks: [
-      {
-        id: 'task-1',
-        title: '3D AYT Matematik: Türev Test 7-8 Çözülecek',
-        assignedBy: 'anil',
-        assignedTo: 'fadime',
-        priority: 'high',
-        date: '2026-10-02',
-        completed: false
-      },
-      {
-        id: 'task-2',
-        title: 'Trigonometri Çıkmış Sorular (Son 5 Yıl)',
-        assignedBy: 'anil',
-        assignedTo: 'fadime',
-        priority: 'medium',
-        date: '2026-10-03',
-        completed: false
-      },
-      {
-        id: 'task-3',
-        title: 'Geometri Deneme 3 Analizi ve Hata Çözümü',
-        assignedBy: 'fadime',
-        assignedTo: 'fadime',
-        priority: 'medium',
-        date: '2026-10-02',
-        completed: true
-      },
-      {
-        id: 'task-4',
-        title: 'DDIA Bölüm 5-6 Replikasyon Özet Çıkarımı',
-        assignedBy: 'anil',
-        assignedTo: 'anil',
-        priority: 'high',
-        date: '2026-10-02',
-        completed: true
-      },
-      {
-        id: 'task-5',
-        title: 'Kafka CDC & Event Sourcing Benchmark Testi',
-        assignedBy: 'anil',
-        assignedTo: 'anil',
-        priority: 'medium',
-        date: '2026-10-04',
-        completed: false
-      }
-    ],
-    anilSprints: [
-      { id: 'sp-1', text: 'DDIA Storage Engine & LSM-Tree Compaction Notları', done: true },
-      { id: 'sp-2', text: 'TulpiFlow Asymmetric Synchronization Protokolü', done: true },
-      { id: 'sp-3', text: 'Linear Algebra: Eigenvalues & PCA Implementasyonu', done: false },
-      { id: 'sp-4', text: 'Capacitor Android APK Packaging Pipeline', done: false }
-    ],
-    mistakes: [
-      {
-        id: 'mis-1',
-        topic: 'AYT Matematik - Türev',
-        note: 'Teğet doğrusunun eğimi türeve eşit olduğu halde dik teğet eğimi m1*m2=-1 kuralında işaret hatası yapıldı.',
-        solved: false,
-        createdAt: '2026-10-01'
-      },
-      {
-        id: 'mis-2',
-        topic: 'Geometri - Çemberde Açı',
-        note: 'Teğet-kiriş açı ile çevre açı arasındaki bağıntı sorusunda merkez açı karıştırıldı.',
-        solved: true,
-        createdAt: '2026-09-29'
-      }
-    ],
+    anil: {
+      name: 'Anıl',
+      title: 'Sistem Mimarı, Geliştirici & Mentör',
+      role: 'mentor',
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=AnilTech',
+      streakDays: 28,
+      todayFocusMinutes: 255,
+      lastAction: 'DDIA LSM-Tree & WAL analiz sprinti tamamlandı',
+      statusText: '🔵 Deep Work Modu'
+    }
+  };
+
+  const INITIAL_TOPIC_TREE = [
+    {
+      id: 'top-1',
+      category: 'matematik',
+      categoryLabel: 'TYT-AYT Matematik',
+      title: 'Türev ve Uygulamaları',
+      subtopics: [
+        { id: 'sub-1-1', title: 'Limit ve Türev Tanımı', completed: true, completedAt: '2026-09-28' },
+        { id: 'sub-1-2', title: 'Türev Alma Kuralları', completed: true, completedAt: '2026-09-30' },
+        { id: 'sub-1-3', title: 'Geometrik Yorum & Teğet Denklemi', completed: true, completedAt: '2026-10-01' },
+        { id: 'sub-1-4', title: 'Maksimum - Minimum Problemleri', completed: false }
+      ]
+    },
+    {
+      id: 'top-2',
+      category: 'matematik',
+      categoryLabel: 'TYT-AYT Matematik',
+      title: 'İntegral ve Alan Hesabı',
+      subtopics: [
+        { id: 'sub-2-1', title: 'Belirsiz İntegral ve Temel Kurallar', completed: false },
+        { id: 'sub-2-2', title: 'Değişken Değiştirme Yöntemi', completed: false },
+        { id: 'sub-2-3', title: 'Belirli İntegral Özellikleri', completed: false },
+        { id: 'sub-2-4', title: 'Eğriler Arasında Kalan Alan Hesabı', completed: false }
+      ]
+    },
+    {
+      id: 'top-3',
+      category: 'matematik',
+      categoryLabel: 'TYT-AYT Matematik',
+      title: 'Fonksiyonlar ve Grafikler',
+      subtopics: [
+        { id: 'sub-3-1', title: 'Fonksiyon Tanım ve Değer Kümesi', completed: true, completedAt: '2026-09-15' },
+        { id: 'sub-3-2', title: 'Birebir ve Örten Fonksiyonlar', completed: true, completedAt: '2026-09-18' },
+        { id: 'sub-3-3', title: 'Bileşke ve Ters Fonksiyon', completed: true, completedAt: '2026-09-20' },
+        { id: 'sub-3-4', title: 'Fonksiyon Grafiklerinde Öteleme', completed: false }
+      ]
+    },
+    {
+      id: 'top-4',
+      category: 'matematik',
+      categoryLabel: 'TYT-AYT Matematik',
+      title: 'Trigonometri',
+      subtopics: [
+        { id: 'sub-4-1', title: 'Birim Çember ve Esas Ölçü', completed: true, completedAt: '2026-09-10' },
+        { id: 'sub-4-2', title: 'Toplam - Fark Formülleri', completed: false },
+        { id: 'sub-4-3', title: 'Yarım Açı Formülleri', completed: false },
+        { id: 'sub-4-4', title: 'Trigonometrik Denklemler', completed: false }
+      ]
+    },
+    {
+      id: 'top-5',
+      category: 'geometri',
+      categoryLabel: 'Geometri',
+      title: 'Analitik Geometri',
+      subtopics: [
+        { id: 'sub-5-1', title: 'Noktanın Analitik İncelenmesi', completed: true, completedAt: '2026-09-12' },
+        { id: 'sub-5-2', title: 'Doğrunun Eğimi ve Grafiği', completed: true, completedAt: '2026-09-22' },
+        { id: 'sub-5-3', title: 'İki Doğru Arasındaki Açı & Uzaklık', completed: false },
+        { id: 'sub-5-4', title: 'Çemberin Analitik İncelenmesi', completed: false }
+      ]
+    },
+    {
+      id: 'top-6',
+      category: 'geometri',
+      categoryLabel: 'Geometri',
+      title: 'Üçgenler ve Çokgenler',
+      subtopics: [
+        { id: 'sub-6-1', title: 'Üçgende Açılar ve Kenar Bağıntıları', completed: true, completedAt: '2026-09-05' },
+        { id: 'sub-6-2', title: 'Benzerlik Teoremleri', completed: true, completedAt: '2026-09-14' },
+        { id: 'sub-6-3', title: 'Dörtgenler ve Özel Çokgenler', completed: false }
+      ]
+    },
+    {
+      id: 'top-7',
+      category: 'fen',
+      categoryLabel: 'Fizik & Kimya',
+      title: 'Mekanik & Elektrik',
+      subtopics: [
+        { id: 'sub-7-1', title: 'Bağıl Hareket ve Newton Yasaları', completed: true, completedAt: '2026-09-25' },
+        { id: 'sub-7-2', title: 'İş, Güç ve Enerji', completed: false },
+        { id: 'sub-7-3', title: 'Elektriksel Potansiyel ve Alan', completed: false }
+      ]
+    }
+  ];
+
+  const INITIAL_TASKS = [
+    {
+      id: 'task-1',
+      title: '3D AYT Matematik: Türev Test 7-8 Çözülecek',
+      assignedBy: 'anil',
+      assignedTo: 'fadime',
+      priority: 'high',
+      date: '2026-10-02',
+      completed: false,
+      createdAt: '2026-10-01'
+    },
+    {
+      id: 'task-2',
+      title: 'Trigonometri Çıkmış Sorular (Son 5 Yıl)',
+      assignedBy: 'anil',
+      assignedTo: 'fadime',
+      priority: 'medium',
+      date: '2026-10-03',
+      completed: false,
+      createdAt: '2026-10-01'
+    },
+    {
+      id: 'task-3',
+      title: 'Geometri Deneme 3 Analizi ve Hata Çözümü',
+      assignedBy: 'fadime',
+      assignedTo: 'fadime',
+      priority: 'medium',
+      date: '2026-10-02',
+      completed: true,
+      createdAt: '2026-09-30'
+    },
+    {
+      id: 'task-4',
+      title: 'DDIA Bölüm 5-6 Replikasyon Özet Çıkarımı',
+      assignedBy: 'anil',
+      assignedTo: 'anil',
+      priority: 'high',
+      date: '2026-10-02',
+      completed: true,
+      createdAt: '2026-09-29'
+    }
+  ];
+
+  const INITIAL_SPRINTS = [
+    { id: 'sp-1', text: 'DDIA Storage Engine & LSM-Tree Compaction Notları', done: true },
+    { id: 'sp-2', text: 'TulpiFlow Asymmetric Synchronization Protokolü', done: true },
+    { id: 'sp-3', text: 'Linear Algebra: Eigenvalues & PCA Implementasyonu', done: false },
+    { id: 'sp-4', text: 'Cloud Firestore Real-Time Senkronizasyonu', done: true }
+  ];
+
+  const INITIAL_MISTAKES = [
+    {
+      id: 'mis-1',
+      topic: 'AYT Matematik - Türev',
+      note: 'Teğet doğrusunun eğimi türeve eşit olduğu halde dik teğet eğimi m1*m2=-1 kuralında işaret hatası yapıldı.',
+      solved: false,
+      createdAt: '2026-10-01'
+    },
+    {
+      id: 'mis-2',
+      topic: 'Geometri - Çemberde Açı',
+      note: 'Teğet-kiriş açı ile çevre açı arasındaki bağıntı sorusunda merkez açı karıştırıldı.',
+      solved: true,
+      createdAt: '2026-09-29'
+    }
+  ];
+
+  // In-memory active state (hydrated by Firestore real-time snapshots)
+  let state = {
+    users: JSON.parse(JSON.stringify(INITIAL_USERS)),
+    topicTree: JSON.parse(JSON.stringify(INITIAL_TOPIC_TREE)),
+    tasks: JSON.parse(JSON.stringify(INITIAL_TASKS)),
+    anilSprints: JSON.parse(JSON.stringify(INITIAL_SPRINTS)),
+    mistakes: JSON.parse(JSON.stringify(INITIAL_MISTAKES)),
     pomodoro: {
       mode: '25-5',
       durationMinutes: 25,
@@ -198,31 +247,154 @@
     }
   };
 
-  // Load or initialize state
-  let state = loadState();
-
-  function loadState() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Lokal state parse hatası, varsayılana dönülüyor.', e);
+  // =========================================================================
+  // 3. CLOUD FIRESTORE REAL-TIME SYNCHRONIZATION (onSnapshot & setDoc)
+  // =========================================================================
+  function initFirestoreSync() {
+    if (!db) {
+      updateNetworkIndicator(false);
+      return;
     }
-    return JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+    updateNetworkIndicator(true);
+
+    // 1. Listen to 'tulpiflow_users' collection
+    db.collection('tulpiflow_users').doc('fadime').onSnapshot((doc) => {
+      if (doc.exists) {
+        state.users.fadime = Object.assign({}, state.users.fadime, doc.data());
+        renderSosBanner();
+        updateStudentOverview();
+        updateUserBadge();
+      } else {
+        // Seed initial data
+        db.collection('tulpiflow_users').doc('fadime').set(INITIAL_USERS.fadime);
+      }
+    }, (error) => {
+      console.warn('Fadime user snapshot error:', error);
+    });
+
+    db.collection('tulpiflow_users').doc('anil').onSnapshot((doc) => {
+      if (doc.exists) {
+        state.users.anil = Object.assign({}, state.users.anil, doc.data());
+        updateUserBadge();
+      } else {
+        // Seed initial data
+        db.collection('tulpiflow_users').doc('anil').set(INITIAL_USERS.anil);
+      }
+    }, (error) => {
+      console.warn('Anıl user snapshot error:', error);
+    });
+
+    // 2. Listen to 'tasks' collection (Real-time mutual task planner)
+    db.collection('tasks').onSnapshot((snapshot) => {
+      if (!snapshot.empty) {
+        const loadedTasks = [];
+        snapshot.forEach((doc) => {
+          loadedTasks.push(Object.assign({ id: doc.id }, doc.data()));
+        });
+        state.tasks = loadedTasks;
+        renderTasks();
+      } else {
+        // Seed initial tasks if empty
+        INITIAL_TASKS.forEach((t) => {
+          db.collection('tasks').doc(t.id).set(t);
+        });
+      }
+    }, (error) => {
+      console.warn('Tasks snapshot error:', error);
+    });
+
+    // 3. Listen to 'app_data' (Curriculum topic tree & mistakes & sprints)
+    db.collection('app_data').doc('curriculum').onSnapshot((doc) => {
+      if (doc.exists && doc.data().topicTree) {
+        state.topicTree = doc.data().topicTree;
+        renderTopicTree();
+      } else {
+        db.collection('app_data').doc('curriculum').set({ topicTree: INITIAL_TOPIC_TREE });
+      }
+    }, (error) => {
+      console.warn('Curriculum snapshot error:', error);
+    });
+
+    db.collection('app_data').doc('mistakes').onSnapshot((doc) => {
+      if (doc.exists && doc.data().list) {
+        state.mistakes = doc.data().list;
+        renderMistakes();
+      } else {
+        db.collection('app_data').doc('mistakes').set({ list: INITIAL_MISTAKES });
+      }
+    }, (error) => {
+      console.warn('Mistakes snapshot error:', error);
+    });
+
+    db.collection('app_data').doc('sprints').onSnapshot((doc) => {
+      if (doc.exists && doc.data().list) {
+        state.anilSprints = doc.data().list;
+        renderAnilSprints();
+      } else {
+        db.collection('app_data').doc('sprints').set({ list: INITIAL_SPRINTS });
+      }
+    }, (error) => {
+      console.warn('Sprints snapshot error:', error);
+    });
   }
 
-  function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.error('Lokal state kaydedilemedi.', e);
+  // Network sync status pill
+  function updateNetworkIndicator(online) {
+    const indicator = document.getElementById('network-status');
+    if (!indicator) return;
+    if (online) {
+      indicator.innerHTML = `
+        <span class="status-dot online"></span>
+        <span class="status-label">Cloud Firestore (Canlı)</span>
+      `;
+      indicator.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+    } else {
+      indicator.innerHTML = `
+        <span class="status-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+        <span class="status-label">Yerel Mod (Bağlantı Aranıyor)</span>
+      `;
+    }
+  }
+
+  // Helper for saving users to Firestore
+  function syncUserToFirestore(role) {
+    if (db && state.users[role]) {
+      db.collection('tulpiflow_users').doc(role).set(state.users[role], { merge: true }).catch((err) => {
+        console.warn('User sync error:', err);
+      });
+    }
+  }
+
+  // Helper for saving curriculum topics to Firestore
+  function syncCurriculumToFirestore() {
+    if (db) {
+      db.collection('app_data').doc('curriculum').set({ topicTree: state.topicTree }, { merge: true }).catch((err) => {
+        console.warn('Curriculum sync error:', err);
+      });
+    }
+  }
+
+  // Helper for saving mistakes to Firestore
+  function syncMistakesToFirestore() {
+    if (db) {
+      db.collection('app_data').doc('mistakes').set({ list: state.mistakes }, { merge: true }).catch((err) => {
+        console.warn('Mistakes sync error:', err);
+      });
+    }
+  }
+
+  // Helper for saving sprints to Firestore
+  function syncSprintsToFirestore() {
+    if (db) {
+      db.collection('app_data').doc('sprints').set({ list: state.anilSprints }, { merge: true }).catch((err) => {
+        console.warn('Sprints sync error:', err);
+      });
     }
   }
 
   // =========================================================================
-  // 2. WEB AUDIO API SYNTHESIZER (NO EXTERNAL AUDIO FILES NEEDED!)
+  // 4. WEB AUDIO API SYNTHESIZER (NO EXTERNAL AUDIO FILES NEEDED!)
   // =========================================================================
   let audioCtx = null;
   function getAudioContext() {
@@ -236,12 +408,10 @@
     return audioCtx;
   }
 
-  // Sensational opening chord synthesizer
   function playOpeningChord() {
     try {
       const ctx = getAudioContext();
       const now = ctx.currentTime;
-      // Polyphonic ascending dream chord (C4, G4, C5, E5, G5, B5)
       const freqs = [261.63, 392.00, 523.25, 659.25, 783.99, 987.77];
       freqs.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -264,12 +434,10 @@
     }
   }
 
-  // Crystal celebration fanfare chord
   function playCelebrationChime() {
     try {
       const ctx = getAudioContext();
       const now = ctx.currentTime;
-      // High triumphant arpeggio (C5, E5, G5, C6)
       const freqs = [523.25, 659.25, 783.99, 1046.50];
       freqs.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -292,7 +460,6 @@
     }
   }
 
-  // Timer complete gong
   function playTimerAlarm() {
     try {
       const ctx = getAudioContext();
@@ -300,7 +467,7 @@
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, now); // A5
+      osc.frequency.setValueAtTime(880, now);
       osc.frequency.exponentialRampToValueAtTime(440, now + 1.2);
 
       gain.gain.setValueAtTime(0.2, now);
@@ -316,7 +483,7 @@
     }
   }
 
-  // Focus Shield: Synthesized Pink Noise / Ambient Rain
+  // Focus Shield: Pink Noise & Rain generator
   let ambientNoiseSource = null;
   let ambientGainNode = null;
   let isAmbientPlaying = false;
@@ -348,7 +515,7 @@
           b4 = 0.55000 * b4 + white * 0.5329522;
           b5 = -0.7616 * b5 - white * 0.0168980;
           output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-          output[i] *= 0.11; // Gain normalization
+          output[i] *= 0.11;
           b6 = white * 0.115926;
         }
 
@@ -356,7 +523,6 @@
         ambientNoiseSource.buffer = noiseBuffer;
         ambientNoiseSource.loop = true;
 
-        // Low-pass filter to sound like gentle rain
         const filter = ctx.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(800, ctx.currentTime);
@@ -379,7 +545,7 @@
   }
 
   // =========================================================================
-  // 3. FULL-SCREEN CONFETTI ENGINE (PHYSICS-BASED)
+  // 5. FULL-SCREEN CONFETTI ENGINE (PHYSICS-BASED)
   // =========================================================================
   const confettiCanvas = document.getElementById('confetti-canvas');
   const cctx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
@@ -426,8 +592,8 @@
       const p = confettiParticles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.45; // gravity
-      p.vx *= 0.98; // air resistance
+      p.vy += 0.45;
+      p.vx *= 0.98;
       p.rotation += p.rotationSpeed;
       p.opacity -= 0.007;
 
@@ -452,7 +618,7 @@
   }
 
   // =========================================================================
-  // 4. SENSATIONAL "tulpi normal flow" OPENING WOW SPLASH & CANVAS MESH
+  // 6. SENSATIONAL "tulpi normal flow" OPENING WOW SPLASH
   // =========================================================================
   const splashOverlay = document.getElementById('wow-splash-overlay');
   const splashCanvas = document.getElementById('splash-canvas');
@@ -512,7 +678,7 @@
     renderMesh();
   }
 
-  function launchWowSplash(isManual = false) {
+  function launchWowSplash() {
     if (!splashOverlay) return;
     splashOverlay.classList.remove('exit-anim', 'hidden');
     splashOverlay.classList.add('active');
@@ -521,16 +687,15 @@
     playOpeningChord();
 
     const statusLabel = document.getElementById('splash-status-label');
-    if (statusLabel) statusLabel.textContent = 'Kuantum Odak Alanı İlklendiriliyor...';
+    if (statusLabel) statusLabel.textContent = 'Cloud Firestore Canlı Ağına Bağlanılıyor...';
 
     setTimeout(() => {
       if (statusLabel) statusLabel.textContent = 'Eşzamanlı Hesap Verebilirlik Hazır ⚡';
     }, 1200);
 
-    // Auto dismiss after 2.6 seconds if not manually skipped
     const timer = setTimeout(() => {
       dismissSplash();
-    }, 2600);
+    }, 2500);
 
     document.getElementById('skip-splash-btn').onclick = () => {
       clearTimeout(timer);
@@ -549,7 +714,7 @@
   }
 
   // =========================================================================
-  // 5. ONE-TIME DEVICE PASSCODE GATEWAY
+  // 7. PRIVATE PASSCODE GATEWAY (ONE-TIME PERSISTENT DEVICE AUTH)
   // =========================================================================
   let currentAuth = null;
 
@@ -564,7 +729,6 @@
         console.warn('Auth token bozuk.');
       }
     }
-    // Show passcode modal
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) authOverlay.classList.remove('hidden');
   }
@@ -612,38 +776,42 @@
 
   function applyUserRole(role) {
     const user = state.users[role] || state.users.fadime;
-    document.getElementById('user-name-display').textContent = user.name;
-    document.getElementById('user-role-display').textContent = user.title;
-    document.getElementById('user-avatar-img').src = user.avatar;
-
-    // Switch default tab based on user
+    updateUserBadge();
     switchTab(role);
   }
 
+  function updateUserBadge() {
+    if (!currentAuth) return;
+    const user = state.users[currentAuth.role] || state.users.fadime;
+    const nameEl = document.getElementById('user-name-display');
+    const roleEl = document.getElementById('user-role-display');
+    const avatarEl = document.getElementById('user-avatar-img');
+
+    if (nameEl) nameEl.textContent = user.name;
+    if (roleEl) roleEl.textContent = user.title;
+    if (avatarEl) avatarEl.src = user.avatar;
+  }
+
   // =========================================================================
-  // 6. TAB NAVIGATION SYSTEM (TRUNK TEST COMPLIANT)
+  // 8. TAB NAVIGATION SYSTEM (TRUNK TEST COMPLIANT)
   // =========================================================================
   let currentActiveTab = 'fadime';
 
   function switchTab(tabId) {
     currentActiveTab = tabId;
 
-    // Update Desktop Nav Tabs
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.classList.toggle('active', tab.getAttribute('data-tab') === tabId);
     });
 
-    // Update Mobile Nav Tabs
     document.querySelectorAll('.m-nav-btn').forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
     });
 
-    // Update Panes
     document.querySelectorAll('.tab-pane').forEach(pane => {
       pane.classList.toggle('active', pane.id === 'pane-' + tabId);
     });
 
-    // Update Breadcrumb
     const bcCurrent = document.getElementById('bc-current-space');
     const bcSub = document.getElementById('bc-active-sub');
 
@@ -663,7 +831,7 @@
   }
 
   // =========================================================================
-  // 7. TOPIC TREE & SEMANTIC PROGRESS ENGINE
+  // 9. TOPIC TREE & SEMANTIC PROGRESS ENGINE
   // =========================================================================
   let activeTopicCategory = 'all';
 
@@ -679,7 +847,6 @@
       return topic.category === activeTopicCategory;
     });
 
-    // Calculate overall stats across all topics
     state.topicTree.forEach(t => {
       t.subtopics.forEach(sub => {
         totalSubtopics++;
@@ -693,7 +860,6 @@
     if (pctLabel) pctLabel.textContent = overallPct + '%';
     if (pctFill) pctFill.style.width = overallPct + '%';
 
-    // Render cards
     container.innerHTML = '';
     filteredTopics.forEach(topic => {
       const topicDone = topic.subtopics.filter(s => s.completed).length;
@@ -719,7 +885,6 @@
       container.appendChild(card);
     });
 
-    // Attach click toggles
     container.querySelectorAll('.subtopic-item').forEach(item => {
       item.addEventListener('click', () => {
         const tId = item.getAttribute('data-topic-id');
@@ -739,17 +904,20 @@
     if (sub.completed) {
       sub.completedAt = new Date().toISOString().split('T')[0];
       state.users.fadime.lastAction = `${topic.title}: ${sub.title} tamamlandı`;
+      syncUserToFirestore('fadime');
       if (!silent) {
         showCelebrationModal('Fadime', `${topic.title} - ${sub.title}`);
       }
     }
-    saveState();
+
+    // Sync to Firestore
+    syncCurriculumToFirestore();
     renderTopicTree();
     updateStudentOverview();
   }
 
   // =========================================================================
-  // 8. NATURAL LANGUAGE & VOICE JOURNALING PIPELINE
+  // 10. NATURAL LANGUAGE VOICE-TO-TASK PIPELINE
   // =========================================================================
   let recognition = null;
   let isRecording = false;
@@ -757,9 +925,8 @@
   function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      console.warn('Web Speech API bu tarayıcıda desteklenmiyor.');
       const statusText = document.getElementById('voice-status-text');
-      if (statusText) statusText.textContent = 'Tarayıcınız ses tanımayı desteklemiyor. Aşağıdaki metin kutusunu kullanabilirsiniz.';
+      if (statusText) statusText.textContent = 'Tarayıcınız ses tanımayı desteklemiyor. Aşağıdaki kutudan metin girebilirsiniz.';
       return null;
     }
 
@@ -782,8 +949,7 @@
     };
 
     rec.onerror = (event) => {
-      console.warn('Ses tanıma hatası:', event.error);
-      document.getElementById('voice-status-text').textContent = 'Ses alınamadı: ' + event.error;
+      document.getElementById('voice-status-text').textContent = 'Ses hatası: ' + event.error;
       stopSpeechRecognition();
     };
 
@@ -823,24 +989,18 @@
     }
   }
 
-  // Semantic intent parsing & topic matching
   function parseVoiceIntent(rawText) {
     if (!rawText || !rawText.trim()) return;
 
     const text = rawText.toLowerCase().replace(/['".,]/g, '');
-    const triggerWords = ['bitti', 'bitirdim', 'hallettim', 'haloldu', 'tamamladim', 'cozdum', 'yaptim', 'okudum'];
-    const hasTrigger = triggerWords.some(w => text.includes(w));
-
     let matchedSubtopic = null;
     let matchedTopic = null;
 
-    // Search against topic tree titles & subtopics
     for (const topic of state.topicTree) {
       for (const sub of topic.subtopics) {
         const subWords = sub.title.toLowerCase().split(' ');
         const topicWords = topic.title.toLowerCase().split(' ');
 
-        // Check matching overlap
         const matchesSub = subWords.some(w => w.length > 3 && text.includes(w));
         const matchesTopic = topicWords.some(w => w.length > 3 && text.includes(w));
 
@@ -857,14 +1017,14 @@
       matchedSubtopic.completed = true;
       matchedSubtopic.completedAt = new Date().toISOString().split('T')[0];
       state.users.fadime.lastAction = `${matchedTopic.title}: ${matchedSubtopic.title} tamamlandı`;
-      saveState();
+      syncUserToFirestore('fadime');
+      syncCurriculumToFirestore();
       renderTopicTree();
       updateStudentOverview();
 
       showCelebrationModal('Fadime', `${matchedTopic.title} - ${matchedSubtopic.title}`);
       document.getElementById('voice-status-text').textContent = `🎯 Eşleşti: "${matchedSubtopic.title}" başarıyla tamamlandı!`;
     } else {
-      // If no exact curriculum node, create dynamic completed task!
       const newTask = {
         id: 'voice-task-' + Date.now(),
         title: rawText.charAt(0).toUpperCase() + rawText.slice(1),
@@ -872,18 +1032,22 @@
         assignedTo: 'fadime',
         priority: 'medium',
         date: new Date().toISOString().split('T')[0],
-        completed: true
+        completed: true,
+        createdAt: new Date().toISOString()
       };
-      state.tasks.unshift(newTask);
-      saveState();
-      renderTasks();
+      if (db) {
+        db.collection('tasks').doc(newTask.id).set(newTask);
+      } else {
+        state.tasks.unshift(newTask);
+        renderTasks();
+      }
       showCelebrationModal('Fadime', newTask.title);
       document.getElementById('voice-status-text').textContent = `🎯 Yeni görev olarak kaydedildi ve tamamlandı!`;
     }
   }
 
   // =========================================================================
-  // 9. CELEBRATION ENGINE & FEEDBACK MODAL
+  // 11. CELEBRATION ENGINE & FEEDBACK MODAL
   // =========================================================================
   function showCelebrationModal(userName, subjectTitle) {
     const modal = document.getElementById('celebration-modal-overlay');
@@ -892,18 +1056,16 @@
 
     if (titleEl) titleEl.textContent = `Tebrikler ${userName}! 🎉`;
     if (descEl) {
-      descEl.textContent = `"${subjectTitle}" konusunu başarıyla tamamladın! Çalışma ivmen ve disiplinin hedefine doğru emin adımlarla ilerliyor.`;
+      descEl.textContent = `"${subjectTitle}" konusunu başarıyla tamamladın! Çalışma ivmen hedefine doğru emin adımlarla ilerliyor.`;
     }
 
     modal.classList.remove('hidden');
-
-    // Trigger visual confetti and audio chime
     triggerConfetti();
     playCelebrationChime();
   }
 
   // =========================================================================
-  // 10. POMODORO TIMER SYSTEM
+  // 12. POMODORO TIMER SYSTEM
   // =========================================================================
   let timerInterval = null;
   let timerMode = '25-5';
@@ -942,24 +1104,21 @@
   function startPauseTimer() {
     const btn = document.getElementById('timer-start-pause-btn');
     if (timerIsRunning) {
-      // Pause
       clearInterval(timerInterval);
       timerIsRunning = false;
       if (btn) btn.textContent = 'Devam Et ▷';
     } else {
-      // Start
-      getAudioContext(); // Ensure Audio Context on user gesture
+      getAudioContext();
       timerIsRunning = true;
       if (btn) btn.textContent = 'Duraklat ⏸';
 
       timerInterval = setInterval(() => {
         if (timerMode === 'deepwork') {
-          timerSecondsLeft++; // counts up in deepwork
+          timerSecondsLeft++;
         } else {
           if (timerSecondsLeft > 0) {
             timerSecondsLeft--;
           } else {
-            // Finished
             clearInterval(timerInterval);
             timerIsRunning = false;
             playTimerAlarm();
@@ -1009,7 +1168,7 @@
   }
 
   // =========================================================================
-  // 11. CROSS-ASSIGNMENT TASK PLANNER & CALENDAR
+  // 13. CROSS-ASSIGNMENT TASK PLANNER & CALENDAR
   // =========================================================================
   let taskFilter = 'all';
 
@@ -1050,7 +1209,6 @@
       container.appendChild(card);
     });
 
-    // Check click
     container.querySelectorAll('.task-check-circle').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-task-id');
@@ -1058,13 +1216,15 @@
       });
     });
 
-    // Delete click
     container.querySelectorAll('.delete-task-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-del-id');
-        state.tasks = state.tasks.filter(t => t.id !== id);
-        saveState();
-        renderTasks();
+        if (db) {
+          db.collection('tasks').doc(id).delete();
+        } else {
+          state.tasks = state.tasks.filter(t => t.id !== id);
+          renderTasks();
+        }
       });
     });
   }
@@ -1072,12 +1232,18 @@
   function toggleTask(taskId) {
     const task = state.tasks.find(t => t.id === taskId);
     if (!task) return;
-    task.completed = !task.completed;
-    if (task.completed) {
+    const newStatus = !task.completed;
+
+    if (db) {
+      db.collection('tasks').doc(taskId).update({ completed: newStatus });
+    } else {
+      task.completed = newStatus;
+      renderTasks();
+    }
+
+    if (newStatus) {
       showCelebrationModal(task.assignedTo === 'fadime' ? 'Fadime' : 'Anıl', task.title);
     }
-    saveState();
-    renderTasks();
   }
 
   function renderWeekMatrix() {
@@ -1107,14 +1273,14 @@
   }
 
   // =========================================================================
-  // 12. MENTOR SUPERVISION, DELEGATION & SPRINT LIST
+  // 14. MENTOR SUPERVISION, DELEGATION & SPRINT LIST
   // =========================================================================
   function renderAnilSprints() {
     const list = document.getElementById('anil-sprint-list');
     if (!list) return;
     list.innerHTML = '';
 
-    state.anilSprints.forEach((sp, idx) => {
+    state.anilSprints.forEach((sp) => {
       const li = document.createElement('li');
       li.className = `sprint-item ${sp.done ? 'checked' : ''}`;
       li.innerHTML = `
@@ -1123,7 +1289,7 @@
       `;
       li.addEventListener('click', () => {
         sp.done = !sp.done;
-        saveState();
+        syncSprintsToFirestore();
         renderAnilSprints();
       });
       list.appendChild(li);
@@ -1147,7 +1313,7 @@
         if (rBtn) {
           rBtn.addEventListener('click', () => {
             state.users.fadime.sosActive = false;
-            saveState();
+            syncUserToFirestore('fadime');
             updateStudentOverview();
             renderSosBanner();
           });
@@ -1159,7 +1325,7 @@
   }
 
   // =========================================================================
-  // 13. MISTAKE NOTEBOOK (HATA DEFTERİ) & S.O.S. LOGIC
+  // 15. MISTAKE NOTEBOOK (HATA DEFTERİ) & S.O.S. LOGIC
   // =========================================================================
   function renderMistakes() {
     const container = document.getElementById('mistake-list-container');
@@ -1191,7 +1357,7 @@
         const mis = state.mistakes.find(x => x.id === id);
         if (mis) {
           mis.solved = !mis.solved;
-          saveState();
+          syncMistakesToFirestore();
           renderMistakes();
         }
       });
@@ -1201,7 +1367,7 @@
       b.addEventListener('click', () => {
         const id = b.getAttribute('data-del-mis');
         state.mistakes = state.mistakes.filter(x => x.id !== id);
-        saveState();
+        syncMistakesToFirestore();
         renderMistakes();
       });
     });
@@ -1221,20 +1387,18 @@
   }
 
   // =========================================================================
-  // 14. 365-DAY HEATMAP & BACKUP RESTORE
+  // 16. 365-DAY HEATMAP & BACKUP RESTORE
   // =========================================================================
   function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // 52 weeks * 7 days = 364 days
     const totalDays = 52 * 7;
     for (let i = 0; i < totalDays; i++) {
       const cell = document.createElement('div');
       cell.className = 'heatmap-cell';
 
-      // Density pattern
       let level = 0;
       const rand = Math.random();
       if (rand > 0.85) level = 4;
@@ -1252,7 +1416,7 @@
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute('href', dataStr);
-    dlAnchor.setAttribute('download', `tulpiflow_backup_${new Date().toISOString().split('T')[0]}.json`);
+    dlAnchor.setAttribute('download', `tulpiflow_cloud_backup_${new Date().toISOString().split('T')[0]}.json`);
     dlAnchor.click();
   }
 
@@ -1263,9 +1427,11 @@
         const imported = JSON.parse(e.target.result);
         if (imported.topicTree && imported.tasks) {
           state = imported;
-          saveState();
+          syncCurriculumToFirestore();
+          syncMistakesToFirestore();
+          syncSprintsToFirestore();
           initAllViews();
-          alert('✅ Yedek başarıyla geri yüklendi!');
+          alert('✅ Yedek başarıyla Cloud Firestore\'a yüklendi!');
         } else {
           alert('❌ Geçersiz TulpiFlow JSON şeması.');
         }
@@ -1277,7 +1443,7 @@
   }
 
   // =========================================================================
-  // 15. INITIALIZATION & EVENT LISTENERS
+  // 17. INITIALIZATION & EVENT LISTENERS
   // =========================================================================
   function initAllViews() {
     renderTopicTree();
@@ -1292,15 +1458,18 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Launch Wow Splash
+    // 1. Initialize Firestore real-time listeners
+    initFirestoreSync();
+
+    // 2. Launch Wow Splash
     launchWowSplash();
 
-    // 2. Re-trigger WOW splash on brand click
+    // 3. Re-trigger WOW splash on brand click
     document.getElementById('re-trigger-splash').addEventListener('click', () => {
-      launchWowSplash(true);
+      launchWowSplash();
     });
 
-    // 3. Auth Form Handlers
+    // 4. Auth Form Handlers
     document.getElementById('auth-submit-btn').addEventListener('click', () => {
       const code = document.getElementById('passcode-input').value;
       verifyPasscode(code);
@@ -1310,15 +1479,7 @@
         verifyPasscode(e.target.value);
       }
     });
-    document.querySelectorAll('.chip-btn').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const code = chip.getAttribute('data-code');
-        document.getElementById('passcode-input').value = code;
-        verifyPasscode(code);
-      });
-    });
 
-    // Switch Role / Logout button
     document.getElementById('switch-role-btn').addEventListener('click', () => {
       if (confirm('Cihaz şifre ekranına dönmek istiyor musunuz?')) {
         localStorage.removeItem(AUTH_KEY);
@@ -1326,7 +1487,7 @@
       }
     });
 
-    // 4. Tab Switching
+    // 5. Tab Switching
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         switchTab(tab.getAttribute('data-tab'));
@@ -1338,10 +1499,10 @@
       });
     });
 
-    // 5. Ambient Focus Shield
+    // 6. Ambient Focus Shield
     document.getElementById('ambient-sound-toggle').addEventListener('click', toggleFocusShield);
 
-    // 6. Voice Recognition
+    // 7. Voice Recognition
     document.getElementById('voice-record-btn').addEventListener('click', toggleSpeechRecognition);
     document.getElementById('parse-intent-btn').addEventListener('click', () => {
       const val = document.getElementById('transcript-input').value;
@@ -1355,7 +1516,7 @@
       });
     });
 
-    // 7. Pomodoro Controls
+    // 8. Pomodoro Controls
     document.getElementById('timer-start-pause-btn').addEventListener('click', startPauseTimer);
     document.getElementById('timer-reset-btn').addEventListener('click', resetTimer);
     document.querySelectorAll('.mode-pill').forEach(pill => {
@@ -1364,12 +1525,12 @@
       });
     });
 
-    // 8. Celebration Modal Close
+    // 9. Celebration Modal Close
     document.getElementById('close-celebration-btn').addEventListener('click', () => {
       document.getElementById('celebration-modal-overlay').classList.add('hidden');
     });
 
-    // 9. Topic Category Filters
+    // 10. Topic Category Filters
     document.querySelectorAll('#topic-category-filters .filter-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('#topic-category-filters .filter-pill').forEach(p => p.classList.remove('active'));
@@ -1379,7 +1540,7 @@
       });
     });
 
-    // 10. Calendar Filters
+    // 11. Calendar Filters
     document.querySelectorAll('.calendar-filters .filter-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('.calendar-filters .filter-pill').forEach(p => p.classList.remove('active'));
@@ -1389,37 +1550,39 @@
       });
     });
 
-    // 11. S.O.S. Trigger & Resolve
+    // 12. S.O.S. Trigger & Resolve (Synced with Firestore)
     document.getElementById('trigger-sos-btn').addEventListener('click', () => {
       const note = prompt('Mentörün Anıl\'a bildirmek istediğin konuyu veya tıkandığın noktayı yaz:', 'Türev geometrik yorum soru tipi');
       if (note) {
         state.users.fadime.sosActive = true;
         state.users.fadime.sosMessage = note;
-        saveState();
+        syncUserToFirestore('fadime');
         renderSosBanner();
         updateStudentOverview();
-        alert('🚨 S.O.S. sinyali Anıl\'ın denetim paneline iletildi!');
+        alert('🚨 S.O.S. sinyali Anıl\'ın ekranına canlı olarak iletildi!');
       }
     });
 
     document.getElementById('resolve-sos-btn').addEventListener('click', () => {
       state.users.fadime.sosActive = false;
-      saveState();
+      syncUserToFirestore('fadime');
       renderSosBanner();
       updateStudentOverview();
     });
 
-    // 12. Mentor Cheer / Encouragement
+    // 13. Mentor Cheer / Encouragement
     document.getElementById('send-cheer-btn').addEventListener('click', () => {
       const input = document.getElementById('cheer-message-input');
       const msg = input.value.trim();
       if (msg) {
-        alert(`🌸 Fadime'ye mesaj iletildi: "${msg}"`);
+        state.users.fadime.lastAction = `Koç Notu: "${msg}"`;
+        syncUserToFirestore('fadime');
+        alert(`🌸 Fadime'nin ekranına anında iletildi: "${msg}"`);
         input.value = '';
       }
     });
 
-    // 13. Delegate Task to Fadime (Mentor panel)
+    // 14. Delegate Task to Fadime (Mentor panel -> Cloud Firestore)
     document.getElementById('delegate-task-btn').addEventListener('click', () => {
       const title = document.getElementById('delegate-title-input').value.trim();
       const date = document.getElementById('delegate-date-input').value || new Date().toISOString().split('T')[0];
@@ -1430,19 +1593,26 @@
         return;
       }
 
-      state.tasks.unshift({
+      const newTask = {
         id: 'del-' + Date.now(),
         title: title,
         assignedBy: 'anil',
         assignedTo: 'fadime',
         priority: priority,
         date: date,
-        completed: false
-      });
-      saveState();
-      renderTasks();
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (db) {
+        db.collection('tasks').doc(newTask.id).set(newTask);
+      } else {
+        state.tasks.unshift(newTask);
+        renderTasks();
+      }
+
       document.getElementById('delegate-title-input').value = '';
-      alert(`✅ Görev Fadime'nin takvimine başarıyla eklendi!`);
+      alert(`✅ Görev Cloud Firestore'a kaydedildi ve Fadime'ye anında iletildi!`);
     });
 
     // Add Sprint for Anıl
@@ -1451,13 +1621,13 @@
       const val = input.value.trim();
       if (val) {
         state.anilSprints.push({ id: 'sp-' + Date.now(), text: val, done: false });
-        saveState();
+        syncSprintsToFirestore();
         renderAnilSprints();
         input.value = '';
       }
     });
 
-    // 14. Modals (New Task & Mistake)
+    // 15. Modals (New Task & Mistake)
     document.getElementById('open-new-task-modal-btn').addEventListener('click', () => {
       document.getElementById('add-task-modal-overlay').classList.remove('hidden');
     });
@@ -1467,7 +1637,7 @@
     });
 
     document.querySelectorAll('.close-modal-btn, [data-close]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const modalId = btn.getAttribute('data-close') || btn.closest('.modal-overlay').id;
         document.getElementById(modalId).classList.add('hidden');
       });
@@ -1482,17 +1652,24 @@
 
       if (!title) return alert('Başlık gerekli');
 
-      state.tasks.unshift({
+      const newTask = {
         id: 'task-' + Date.now(),
         title: title,
         assignedBy: currentAuth ? currentAuth.role : 'anil',
         assignedTo: forUser,
         priority: priority,
         date: date,
-        completed: false
-      });
-      saveState();
-      renderTasks();
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (db) {
+        db.collection('tasks').doc(newTask.id).set(newTask);
+      } else {
+        state.tasks.unshift(newTask);
+        renderTasks();
+      }
+
       document.getElementById('add-task-modal-overlay').classList.add('hidden');
       document.getElementById('task-title-input').value = '';
     });
@@ -1511,14 +1688,14 @@
         solved: false,
         createdAt: new Date().toISOString().split('T')[0]
       });
-      saveState();
+      syncMistakesToFirestore();
       renderMistakes();
       document.getElementById('add-mistake-modal-overlay').classList.add('hidden');
       document.getElementById('mistake-topic-input').value = '';
       document.getElementById('mistake-note-input').value = '';
     });
 
-    // 15. Export & Import JSON
+    // 16. Export & Import JSON
     document.getElementById('export-json-btn').addEventListener('click', exportDataAsJSON);
     document.getElementById('import-json-input').addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
@@ -1527,21 +1704,27 @@
     });
     document.getElementById('reset-data-btn').addEventListener('click', () => {
       if (confirm('Tüm ilerleme verilerini sıfırlayıp fabrika ayarlarına dönmek istediğinize emin misiniz?')) {
-        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-        saveState();
+        state.topicTree = JSON.parse(JSON.stringify(INITIAL_TOPIC_TREE));
+        state.tasks = JSON.parse(JSON.stringify(INITIAL_TASKS));
+        state.mistakes = JSON.parse(JSON.stringify(INITIAL_MISTAKES));
+        state.anilSprints = JSON.parse(JSON.stringify(INITIAL_SPRINTS));
+        state.users = JSON.parse(JSON.stringify(INITIAL_USERS));
+        syncCurriculumToFirestore();
+        syncMistakesToFirestore();
+        syncSprintsToFirestore();
+        syncUserToFirestore('anil');
+        syncUserToFirestore('fadime');
         initAllViews();
-        alert('Veriler sıfırlandı.');
+        alert('Veriler Cloud Firestore üzerinde fabrika ayarlarına sıfırlandı.');
       }
     });
 
-    // Set today's date in date inputs
     const todayStr = new Date().toISOString().split('T')[0];
     const dDate = document.getElementById('delegate-date-input');
     const tDate = document.getElementById('task-date-input');
     if (dDate) dDate.value = todayStr;
     if (tDate) tDate.value = todayStr;
 
-    // Initialize all views
     initAllViews();
   });
 
