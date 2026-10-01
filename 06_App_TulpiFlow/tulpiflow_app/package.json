@@ -1,0 +1,20 @@
+{
+  "name": "tulpiflow-app",
+  "version": "1.0.0",
+  "description": "TulpiFlow Asymmetric Co-Working Engine APK and PWA",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "cap:add": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "build:apk": "npx cap sync android && cd android && gradlew assembleDebug"
+  },
+  "author": "Anıl & Tulpi Ecosystem",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}

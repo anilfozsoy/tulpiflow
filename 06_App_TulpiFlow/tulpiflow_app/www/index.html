@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TulpiFlow — Asymmetric Co-Working & Accountability Engine</title>
+  <meta name="description" content="TulpiFlow: Mentör ve Öğrenci Eşzamanlı Çalışma, Sesli Görev Otomasyonu ve Bilişsel Odaklanma Ekosistemi">
+  <meta name="theme-color" content="#070b14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Full-screen Canvas for Confetti & Particles -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ========================================================================= -->
+  <!-- 0. SENSATIONAL "tulpi normal flow" OPENING WOW SPLASH                      -->
+  <!-- ========================================================================= -->
+  <div id="wow-splash-overlay" class="wow-splash active">
+    <canvas id="splash-canvas"></canvas>
+    <div class="splash-content">
+      <div class="splash-badge">TULPI ECOSYSTEM CORE</div>
+      <div class="splash-title-container">
+        <h1 class="splash-text-glow" id="splash-animated-text">
+          <span class="word-tulpi">tulpi</span>
+          <span class="word-normal">normal</span>
+          <span class="word-flow">flow</span>
+        </h1>
+      </div>
+      <p class="splash-subtitle">Asymmetric Co-Working & Cognitive Focus Engine</p>
+      <div class="splash-status-pill">
+        <span class="pulse-dot"></span>
+        <span id="splash-status-label">Kuantum Odak Alanı İlklendiriliyor...</span>
+      </div>
+      <button id="skip-splash-btn" class="splash-skip-btn">Hemen Başla ❯</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. PRIVATE PASSCODE LOGIN                                                 -->
+  <!-- ========================================================================= -->
+  <div id="auth-modal-overlay" class="modal-overlay hidden">
+    <div class="auth-card elevation-modal">
+      <div class="auth-header">
+        <div class="auth-shield-icon">🌷</div>
+        <h2>TulpiFlow Giriş</h2>
+        <p>Anıl ve Fadime'ye özel asimetrik çalışma alanı. Uygulamaya ilk girişiniz olduğu için lütfen size verilen tek seferlik şifrenizi girin. (Bu cihazda bir daha şifre sorulmayacaktır).</p>
+      </div>
+      
+      <div class="auth-form">
+        <label for="passcode-input">Giriş Şifresi</label>
+        <div class="input-with-icon">
+          <input type="password" id="passcode-input" placeholder="••••••••" autocomplete="off" spellcheck="false">
+          <button id="auth-submit-btn" class="primary-btn glow-purple">Giriş Yap</button>
+        </div>
+        <div id="auth-error-msg" class="auth-error hidden">Geçersiz şifre! Lütfen size iletilen kodu girin.</div>
+        
+        <div class="auth-forgot-row">
+          <small class="text-muted">Şifrenizi unuttuysanız mentörünüze (Anıl) danışın.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION SHELL                                                 -->
+  <!-- ========================================================================= -->
+  <div id="app-shell" class="app-shell">
+
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="re-trigger-splash" class="brand-badge-btn" title="Sansasyonel WOW Animasyonunu Tekrar Oynat">
+          <span class="tulpi-icon">🌷</span>
+          <span class="brand-text">tulpi<span class="accent-flow">flow</span></span>
+        </button>
+        <span class="system-status-indicator" id="network-status" title="Local-First Veri Güvenliği">
+          <span class="status-dot online"></span>
+          <span class="status-label">Local-First (Senkron)</span>
+        </span>
+      </div>
+
+      <!-- Navigation Tabs (Trunk Test Compliance) -->
+      <nav class="nav-tabs" role="tablist">
+        <button class="nav-tab active" data-tab="fadime" role="tab" id="tab-btn-fadime">
+          <span class="tab-emoji">🌸</span>
+          <span class="tab-title">Fadime's Space</span>
+          <span class="tab-sub">YKS & Konu Ağacı</span>
+        </button>
+        <button class="nav-tab" data-tab="anil" role="tab" id="tab-btn-anil">
+          <span class="tab-emoji">⚡</span>
+          <span class="tab-title">Anıl's Space</span>
+          <span class="tab-sub">Dev, Math & Sprints</span>
+        </button>
+        <button class="nav-tab" data-tab="calendar" role="tab" id="tab-btn-calendar">
+          <span class="tab-emoji">📅</span>
+          <span class="tab-title">Ortak Takvim</span>
+          <span class="tab-sub">Görev Atama & Plan</span>
+        </button>
+        <button class="nav-tab" data-tab="analytics" role="tab" id="tab-btn-analytics">
+          <span class="tab-emoji">🔥</span>
+          <span class="tab-title">İlham & Isı Haritası</span>
+          <span class="tab-sub">365 Gün Streak</span>
+        </button>
+      </nav>
+
+      <!-- Header Utilities (Voice, Sound Generator, Profile) -->
+      <div class="header-right">
+        <!-- Focus Shield Ambient Sound Toggle -->
+        <button id="ambient-sound-toggle" class="utility-icon-btn" title="Focus Shield: Yağmur & Beyaz Gürültü Sentezleyici">
+          <span class="btn-icon">🌧️</span>
+          <span class="btn-text">Focus Shield</span>
+        </button>
+
+        <!-- Current User Role & Avatar -->
+        <div class="user-badge" id="active-user-badge">
+          <img id="user-avatar-img" class="user-avatar" src="" alt="Profil Avatarı">
+          <div class="user-meta">
+            <span class="user-name" id="user-name-display">Giriş Yapılmadı</span>
+            <span class="user-role" id="user-role-display">Rol Yok</span>
+          </div>
+          <button id="switch-role-btn" class="mini-btn" title="Kullanıcı Değiştir / Çıkış">⇄</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contextual Breadcrumb Banner -->
+    <div class="breadcrumb-bar">
+      <span class="bc-crumb">TulpiFlow</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-crumb" id="bc-current-space">Fadime's Space</span>
+      <span class="bc-sep">/</span>
+      <span class="bc-active" id="bc-active-sub">TYT & AYT İlerleme Durumu</span>
+
+      <div class="co-presence-pill" id="co-presence-pill">
+        <span class="live-pulse"></span>
+        <span id="co-presence-text">Eşzamanlı Bağlantı: Anıl & Fadime Çevrimiçi</span>
+      </div>
+    </div>
+
+    <!-- MAIN SCROLLABLE CONTENT AREA -->
+    <main class="main-content">
+
+      <!-- =================================================================== -->
+      <!-- TAB 1: FADIME'S SPACE (EXAM PREP / YKS)                             -->
+      <!-- =================================================================== -->
+      <section id="pane-fadime" class="tab-pane active">
+        
+        <!-- Emergency SOS Alert (if active) -->
+        <div id="sos-alert-banner" class="sos-banner hidden">
+          <div class="sos-icon">🚨</div>
+          <div class="sos-content">
+            <h4>ÖĞRENCİ S.O.S. SİNYALİ AKTİF!</h4>
+            <p id="sos-message-text">Fadime şu konuda desteğe ihtiyaç duyuyor: "Türev geometrik yorum soru tipi"</p>
+          </div>
+          <button id="resolve-sos-btn" class="secondary-btn">Sinyali Çözüldü İşaretle</button>
+        </div>
+
+        <!-- Hero Co-Working Live Status Bar -->
+        <div class="grid-2-col">
+          
+          <!-- Fadime Focus & Pomodoro Card -->
+          <div class="focus-card elevation-card">
+            <div class="card-header">
+              <div class="header-tag pink">🌸 FADİME'NİN CANLI ODAK ALANI</div>
+              <span class="session-badge" id="fadime-status-badge">🟡 Serbest Çalışma</span>
+            </div>
+
+            <div class="pomodoro-core">
+              <div class="timer-dial-container">
+                <svg class="timer-svg" viewBox="0 0 200 200">
+                  <circle class="timer-track" cx="100" cy="100" r="88" />
+                  <circle class="timer-progress" id="timer-progress-ring" cx="100" cy="100" r="88" />
+                </svg>
+                <div class="timer-display">
+                  <span class="timer-digits" id="timer-digits">25:00</span>
+                  <span class="timer-label" id="timer-mode-label">STANDART POMODORO</span>
+                </div>
+              </div>
+
+              <div class="timer-controls">
+                <button id="timer-start-pause-btn" class="primary-btn glow-purple">Başlat ▷</button>
+                <button id="timer-reset-btn" class="secondary-btn">Sıfırla ↺</button>
+                <div class="mode-selector">
+                  <button class="mode-pill active" data-mode="25-5">25/5m</button>
+                  <button class="mode-pill" data-mode="50-10">50/10m</button>
+                  <button class="mode-pill" data-mode="deepwork">Deep Work ∞</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Focus Stats Row -->
+            <div class="stats-row">
+              <div class="stat-box">
+                <span class="stat-num" id="fadime-today-minutes">125 dk</span>
+                <span class="stat-desc">Bugünkü Odaklanma</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-num" id="fadime-streak-days">14 Gün</span>
+                <span class="stat-desc">Günlük Streak 🔥</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-num" id="fadime-completed-tasks">18 / 24</span>
+                <span class="stat-desc">Haftalık Görevler</span>
+              </div>
+            </div>
+
+            <!-- Quick Action: S.O.S Button -->
+            <div class="sos-trigger-row">
+              <button id="trigger-sos-btn" class="sos-trigger-btn" title="Mentörüne tıkandığın konuyu bildir">
+                <span>🚨</span> Tıkandım / Mentöre Sinyal Gönder
+              </button>
+            </div>
+          </div>
+
+          <!-- Natural Language Voice-to-Task Card -->
+          <div class="voice-card elevation-card">
+            <div class="card-header">
+              <div class="header-tag purple">🎙️ DOĞAL DİL & SESLİ GÖREV TAMAMLAMA</div>
+              <span class="live-rec-badge hidden" id="live-rec-badge">🔴 Dinleniyor...</span>
+            </div>
+
+            <p class="card-intro">
+              Çalıştığın konuyu sesli olarak anlat! Sistem anahtar kelimeleri (<em>"hallettim", "bitti", "çözdüm", "tamamladım"</em>) yakalayıp müfredat düğümünü otomatik tamamlar ve kutlama motorunu çalıştırır.
+            </p>
+
+            <div class="voice-action-center">
+              <button id="voice-record-btn" class="voice-mic-btn" title="Sesli Kaydı Başlat">
+                <div class="mic-wave-ring"></div>
+                <span class="mic-icon">🎤</span>
+              </button>
+              <div class="voice-status-text" id="voice-status-text">
+                Mikrofona dokunun ve konuşun...
+              </div>
+            </div>
+
+            <!-- Live Speech Transcript / Manual Input Simulation -->
+            <div class="voice-transcript-box">
+              <label for="transcript-input">Algılanan veya Yazılan İfade:</label>
+              <div class="input-with-button">
+                <input type="text" id="transcript-input" placeholder="Örn: 'Bugün türevde geometrik yorumu bitirdim, hallettim'">
+                <button id="parse-intent-btn" class="primary-btn">İşle & Tamamla ⚡</button>
+              </div>
+            </div>
+
+            <!-- Quick Speech Prompts (Fast Click) -->
+            <div class="speech-chips">
+              <span class="chips-title">Hızlı Deneme Cümleleri:</span>
+              <button class="speech-chip" data-phrase="Bugün türevde geometrik yorumu bitirdim, hallettim">"Türevde geometrik yorumu hallettim"</button>
+              <button class="speech-chip" data-phrase="Fonksiyonlar testini çözdüm">"Fonksiyonlar testini çözdüm"</button>
+              <button class="speech-chip" data-phrase="Trigonometri toplam fark formülleri tamamladım">"Trigonometri formülleri tamamladım"</button>
+              <button class="speech-chip" data-phrase="Analitik geometri doğru analizi bitti">"Analitik geometri bitti"</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic Tree (Konu Ağacı İlerlemesi) -->
+        <div class="topic-tree-section elevation-card">
+          <div class="section-top">
+            <div>
+              <h3 class="section-title">📚 YKS Müfredat & Konu Ağacı (Semantic Topic Tree)</h3>
+              <p class="section-desc">Tamamlanan konular yeşil parıldama ile işaretlenir ve ilerleme çubuğuna yansır.</p>
+            </div>
+            <div class="filter-pills" id="topic-category-filters">
+              <button class="filter-pill active" data-cat="all">Tümü</button>
+              <button class="filter-pill" data-cat="matematik">TYT-AYT Matematik</button>
+              <button class="filter-pill" data-cat="geometri">Geometri</button>
+              <button class="filter-pill" data-cat="fen">Fizik & Kimya</button>
+            </div>
+          </div>
+
+          <!-- Overall Progress Bar -->
+          <div class="master-progress-wrapper">
+            <div class="progress-labels">
+              <span>Genel Müfredat Tamamlanma Oranı</span>
+              <span id="topic-percentage-label" class="percentage-value">68%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="topic-progress-fill" class="progress-bar-fill" style="width: 68%;"></div>
+            </div>
+          </div>
+
+          <!-- Dynamic Topic Grid -->
+          <div class="topic-cards-grid" id="topic-cards-container">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- Hata Defteri & Boş Bırakılanlar (Thoughtful Extra Feature) -->
+        <div class="mistake-notebook-section elevation-card">
+          <div class="section-top">
+            <div>
+              <h3 class="section-title">📓 Hata Defteri & Tıkandığım Sorular (Mistake Ledger)</h3>
+              <p class="section-desc">Denemelerde veya testlerde yapamadığın soruları ve takıldığın kavramları buraya not al; Anıl ile haftalık soru çözüm seansında ele alınacaktır.</p>
+            </div>
+            <button id="add-mistake-btn" class="secondary-btn">+ Yeni Soru/Konu Notu Ekle</button>
+          </div>
+
+          <div class="mistake-list" id="mistake-list-container">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =================================================================== -->
+      <!-- TAB 2: ANIL'S SPACE (DEV, MATH & MENTORSHIP)                        -->
+      <!-- =================================================================== -->
+      <section id="pane-anil" class="tab-pane">
+        
+        <div class="grid-2-col">
+          
+          <!-- Anıl Deep Work & Engineering Card -->
+          <div class="focus-card elevation-card">
+            <div class="card-header">
+              <div class="header-tag blue">⚡ ANIL'IN GELİŞTİRME & MÜHENDİSLİK ALANI</div>
+              <span class="session-badge blue" id="anil-status-badge">🔵 Deep Work Modu</span>
+            </div>
+
+            <div class="mentor-status-summary">
+              <div class="mentor-stat-row">
+                <div class="stat-cell">
+                  <span class="cell-val">DDIA & Kafka</span>
+                  <span class="cell-lbl">Aktif Mühendislik Sprinti</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="cell-val">4 Saat 15 Dk</span>
+                  <span class="cell-lbl">Bugünkü Kod & Matematik</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="cell-val">100%</span>
+                  <span class="cell-lbl">Öğrenci İzleme Durumu</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mentor Direct Cheer / Feedback to Fadime -->
+            <div class="mentor-cheer-box">
+              <label for="cheer-message-input">🌸 Fadime'ye Canlı Motivasyon / Koç Notu Bırak:</label>
+              <div class="input-with-button">
+                <input type="text" id="cheer-message-input" placeholder="Örn: 'Türevde harika gidiyorsun! Geometri testlerini de eritirsek AYT cepte.'">
+                <button id="send-cheer-btn" class="primary-btn glow-blue">Gönder 💬</button>
+              </div>
+              <p class="micro-note">Bu not Fadime'nin ekranında anlık tebrik rozeti olarak belirecektir.</p>
+            </div>
+
+            <!-- Anıl Engineering Sprints Tracker -->
+            <div class="sprint-sub-section">
+              <h4 class="sub-title">🛠️ Mimari & Araştırma Hedefleri</h4>
+              <ul class="sprint-checklist" id="anil-sprint-list">
+                <!-- Rendered dynamically -->
+              </ul>
+              <div class="input-with-button" style="margin-top: 12px;">
+                <input type="text" id="new-sprint-input" placeholder="Yeni sprint görevi yaz...">
+                <button id="add-sprint-btn" class="secondary-btn">+ Ekle</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mentorship Supervision & Student Progress Watch -->
+          <div class="supervision-card elevation-card">
+            <div class="card-header">
+              <div class="header-tag green">👁️ ÖĞRENCİ DENETİM VE ANALİZ PANELİ</div>
+              <span class="pill-badge">Canlı Senkron</span>
+            </div>
+
+            <div class="student-overview-box">
+              <div class="student-card-profile">
+                <img class="student-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=FadimeFlower" alt="Fadime Avatar">
+                <div>
+                  <h4>Fadime (YKS Adayı)</h4>
+                  <p class="sub-text">Son Aktivite: <span id="fadime-last-action" class="highlight-green">Türev Geometrik Yorum Tamamlandı</span></p>
+                </div>
+              </div>
+
+              <!-- Fast Action: Assign Task to Fadime -->
+              <div class="quick-delegate-box">
+                <h5>➕ Fadime'nin Takvimine Hızlı Görev / Ödev Ata:</h5>
+                <div class="delegate-form">
+                  <input type="text" id="delegate-title-input" placeholder="Ödev Başlığı (Örn: 3D AYT Matematik Test 9-10)">
+                  <div class="form-row">
+                    <input type="date" id="delegate-date-input">
+                    <select id="delegate-priority-select">
+                      <option value="high">🔴 Yüksek Öncelik</option>
+                      <option value="medium" selected>🟡 Normal Öncelik</option>
+                      <option value="low">🟢 Rutin Tekrar</option>
+                    </select>
+                  </div>
+                  <button id="delegate-task-btn" class="primary-btn glow-green">Fadime'ye Görev Delege Et ➔</button>
+                </div>
+              </div>
+
+              <!-- Student Problem Log Review -->
+              <div class="student-sos-review">
+                <h5>🚨 Bekleyen Öğrenci Soruları:</h5>
+                <div id="mentor-sos-feed" class="sos-feed">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =================================================================== -->
+      <!-- TAB 3: SHARED CALENDAR & TASK DELEGATION                            -->
+      <!-- =================================================================== -->
+      <section id="pane-calendar" class="tab-pane">
+        
+        <div class="calendar-layout elevation-card">
+          <div class="section-top">
+            <div>
+              <h3 class="section-title">📅 Eşzamanlı Takvim & Karşılıklı Görev Paneli</h3>
+              <p class="section-desc">Anıl ve Fadime arasındaki ortak çalışma programı, delege edilen ödevler ve hedef tarihleri.</p>
+            </div>
+            
+            <div class="calendar-filters">
+              <button class="filter-pill active" data-calfilter="all">Tüm Görevler</button>
+              <button class="filter-pill" data-calfilter="from-mentor">⭐ Koçtan Gelenler</button>
+              <button class="filter-pill" data-calfilter="fadime">Fadime'nin Görevleri</button>
+              <button class="filter-pill" data-calfilter="anil">Anıl'ın Görevleri</button>
+            </div>
+          </div>
+
+          <div class="calendar-body-grid">
+            
+            <!-- Task List View -->
+            <div class="task-list-column">
+              <div class="list-actions-bar">
+                <span class="count-tag" id="task-count-tag">8 Aktif Görev</span>
+                <button id="open-new-task-modal-btn" class="primary-btn glow-purple">+ Yeni Görev Ekle</button>
+              </div>
+
+              <div class="tasks-container" id="tasks-container">
+                <!-- Rendered dynamically by app.js -->
+              </div>
+            </div>
+
+            <!-- Mini Calendar / Week Matrix -->
+            <div class="calendar-side-matrix">
+              <h4 class="sub-title">📆 Haftalık Çalışma Matrisi</h4>
+              <div class="week-days-grid" id="week-days-grid">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <div class="co-working-rule-card">
+                <h5>💡 Eşzamanlı Çalışma Kuralı</h5>
+                <p>Birbirinize atadığınız her görev tamamlandığında karşı tarafa bildirim gider. Tamamlanmayan kritik görevler takvimde kırmızı ile işaretlenir.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =================================================================== -->
+      <!-- TAB 4: MUTUAL INSPIRATION & 365-DAY HEATMAP                         -->
+      <!-- =================================================================== -->
+      <section id="pane-analytics" class="tab-pane">
+        
+        <div class="elevation-card">
+          <div class="section-top">
+            <div>
+              <h3 class="section-title">🔥 Ortak İlham & 365 Gün Çalışma Isı Haritası</h3>
+              <p class="section-desc">Her küçük çaba bu haritada bir iz bırakır. Yeşil tonları odaklanılan dakika yoğunluğunu gösterir.</p>
+            </div>
+            <div class="heatmap-legend">
+              <span>Az</span>
+              <span class="legend-box lvl-0"></span>
+              <span class="legend-box lvl-1"></span>
+              <span class="legend-box lvl-2"></span>
+              <span class="legend-box lvl-3"></span>
+              <span class="legend-box lvl-4"></span>
+              <span>Yoğun</span>
+            </div>
+          </div>
+
+          <!-- Heatmap SVG / Grid Container -->
+          <div class="heatmap-scroll-wrapper">
+            <div class="heatmap-grid" id="heatmap-grid">
+              <!-- Rendered dynamically (365 days / 52 weeks) -->
+            </div>
+          </div>
+
+          <!-- Cumulative Metric Comparison -->
+          <div class="comparison-grid">
+            <div class="comp-card">
+              <div class="comp-avatar">🌸</div>
+              <h4>Fadime (YKS Hazırlık)</h4>
+              <div class="metric-pair">
+                <span>Toplam Odak Süresi:</span>
+                <strong id="heat-fadime-hours">142 Saat</strong>
+              </div>
+              <div class="metric-pair">
+                <span>Tamamlanan Müfredat Konusu:</span>
+                <strong id="heat-fadime-topics">48 Konu</strong>
+              </div>
+              <div class="metric-pair">
+                <span>Çözülen Soru Tahmini:</span>
+                <strong>~3,850 Soru</strong>
+              </div>
+            </div>
+
+            <div class="comp-card">
+              <div class="comp-avatar">⚡</div>
+              <h4>Anıl (Dev & Math)</h4>
+              <div class="metric-pair">
+                <span>Toplam Derin Çalışma:</span>
+                <strong id="heat-anil-hours">186 Saat</strong>
+              </div>
+              <div class="metric-pair">
+                <span>Tamamlanan Mimari Sprint:</span>
+                <strong id="heat-anil-sprints">32 Modül</strong>
+              </div>
+              <div class="metric-pair">
+                <span>Delege Edilen Görevler:</span>
+                <strong>45 Ödev</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Backup & Restore Center (Local-First Compliance) -->
+          <div class="backup-center-box">
+            <h4>💾 Yerel Veri ve Yedekleme Merkezi</h4>
+            <p>Tüm çalışma verileriniz ve konu ilerlemeleriniz cihazınızda güvendedir. Dilerseniz tek tıkla JSON yedeği alabilir veya başka bir cihaza yükleyebilirsiniz.</p>
+            <div class="backup-actions">
+              <button id="export-json-btn" class="secondary-btn">📥 Tüm Veriyi JSON Olarak İndir</button>
+              <label class="secondary-btn file-input-label">
+                📤 JSON Yedeği Yükle
+                <input type="file" id="import-json-input" accept=".json" class="hidden-input">
+              </label>
+              <button id="reset-data-btn" class="danger-btn">⚠️ Verileri Sıfırla</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Mobile Navigation Bar (PWA / Mobile APK Feel) -->
+    <nav class="mobile-bottom-bar">
+      <button class="m-nav-btn active" data-tab="fadime">
+        <span class="m-icon">🌸</span>
+        <span class="m-label">Fadime</span>
+      </button>
+      <button class="m-nav-btn" data-tab="anil">
+        <span class="m-icon">⚡</span>
+        <span class="m-label">Anıl</span>
+      </button>
+      <button class="m-nav-btn" data-tab="calendar">
+        <span class="m-icon">📅</span>
+        <span class="m-label">Takvim</span>
+      </button>
+      <button class="m-nav-btn" data-tab="analytics">
+        <span class="m-icon">🔥</span>
+        <span class="m-label">Isı Haritası</span>
+      </button>
+    </nav>
+
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 3. CELEBRATION MODAL (KUTLAMA MOTORU)                                     -->
+  <!-- ========================================================================= -->
+  <div id="celebration-modal-overlay" class="modal-overlay hidden">
+    <div class="celebration-card elevation-modal">
+      <div class="celebration-confetti-badge">🎉 BÜYÜK BAŞARI! 🎉</div>
+      <h2 id="celebration-title" class="celebration-title">Tebrikler Fadime!</h2>
+      <p id="celebration-desc" class="celebration-desc">Türevde Geometrik Yorum konusunu başarıyla tamamladın! Çalışma ivmen hedefine doğru hızla yükseliyor.</p>
+      
+      <div class="celebration-meta-pill">
+        <span>🔥 Günlük Streak: <strong>+1 Gün Eklendi</strong></span>
+        <span>⚡ Koçuna bildirim gitti!</span>
+      </div>
+
+      <button id="close-celebration-btn" class="primary-btn glow-purple pulse-btn">Harika, Devam Et! 🚀</button>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 4. NEW TASK / MISTAKE MODALS                                              -->
+  <!-- ========================================================================= -->
+  <!-- Add Task Modal -->
+  <div id="add-task-modal-overlay" class="modal-overlay hidden">
+    <div class="task-modal-card elevation-modal">
+      <div class="modal-head">
+        <h3>➕ Yeni Görev Planla</h3>
+        <button class="close-modal-btn" data-close="add-task-modal-overlay">✕</button>
+      </div>
+      <div class="modal-body">
+        <label for="task-title-input">Görev Başlığı:</label>
+        <input type="text" id="task-title-input" placeholder="Örn: Limit Süreklilik Fasikülü Çöz">
+
+        <div class="grid-2-col-modal">
+          <div>
+            <label for="task-for-select">Kimin İçin?</label>
+            <select id="task-for-select">
+              <option value="fadime">🌸 Fadime</option>
+              <option value="anil">⚡ Anıl</option>
+            </select>
+          </div>
+          <div>
+            <label for="task-priority-select">Öncelik:</label>
+            <select id="task-priority-select">
+              <option value="high">🔴 Yüksek</option>
+              <option value="medium" selected>🟡 Normal</option>
+              <option value="low">🟢 Rutin</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="task-date-input">Hedef Tarih:</label>
+        <input type="date" id="task-date-input">
+
+        <div class="modal-footer">
+          <button class="secondary-btn" data-close="add-task-modal-overlay">Vazgeç</button>
+          <button id="save-new-task-btn" class="primary-btn glow-purple">Görevi Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Mistake Note Modal -->
+  <div id="add-mistake-modal-overlay" class="modal-overlay hidden">
+    <div class="task-modal-card elevation-modal">
+      <div class="modal-head">
+        <h3>📓 Hata Defterine Soru Ekle</h3>
+        <button class="close-modal-btn" data-close="add-mistake-modal-overlay">✕</button>
+      </div>
+      <div class="modal-body">
+        <label for="mistake-topic-input">Ders / Konu:</label>
+        <input type="text" id="mistake-topic-input" placeholder="Örn: AYT Matematik - Türev Maks/Min">
+
+        <label for="mistake-note-input">Sorunun Detayı / Yapılamayan Nokta:</label>
+        <textarea id="mistake-note-input" rows="4" placeholder="Grafikte dönüm noktası formülünü uygulayamadım, teğet eğimi 0 çıkmadı..."></textarea>
+
+        <div class="modal-footer">
+          <button class="secondary-btn" data-close="add-mistake-modal-overlay">Vazgeç</button>
+          <button id="save-mistake-btn" class="primary-btn glow-purple">Hata Defterine Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focus Shield Audio Engine & App Logic Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

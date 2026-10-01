@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TulpiFlow</string>
+    <string name="title_activity_main">TulpiFlow</string>
+    <string name="package_name">com.tulpigo.flow</string>
+    <string name="custom_url_scheme">com.tulpigo.flow</string>
+</resources>
