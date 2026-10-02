@@ -150,3 +150,29 @@
   4. Capacitor Android projesi yerel olarak senkronize edildi, GitHub Actions üzerinde CI/CD derlemesi tamamlandı ve derlenen APK doğrudan masaüstüne teslim edildi.
 - **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
 ---
+
+## [TIMESTAMP: 2026-10-02 04:47:00 UTC+3]
+- **Execution Model:** Gemini 3.8 Flash (High) / Antigravity Autonomous Engine
+- **Prompt Hash / Context ID:** TULPIFLOW-V130-ACCORDION-SECURITY-OTA-INSTALLER
+- **Target Files Affected:**
+  - `06_App_TulpiFlow/tulpiflow_app/index.html` & `www/index.html` (Sanitized: Passcode hints/codes removed, Segmented subtabs bar added, In-app progress bar modal added)
+  - `06_App_TulpiFlow/tulpiflow_app/styles.css` & `www/styles.css` (Added: Accordion disclosure cards, rotating chevrons, progress badges, segmented buttons, update progress bar)
+  - `06_App_TulpiFlow/tulpiflow_app/app.js` & `www/app.js` (Overhauled: `CURRENT_VERSION = "1.3.0"`, Segmented subpane navigation, Accordion subject engine, `downloadAndInstallApk` native installer, safe event listeners, Capacitor Preferences sealing)
+  - `06_App_TulpiFlow/tulpiflow_app/sw.js` & `www/sw.js` (Updated: Cache version bumped to `tulpiflow-cache-v1.3.0`, cached `curriculum.js`)
+  - `.github/workflows/build-apk.yml` (Configured: Automatic release creation and binary upload via `gh release`)
+  - `06_App_TulpiFlow/tulpiflow_app/android/*` (Synchronized via `npx cap sync android`)
+  - Cloud Firestore `app_config/version` (Mühürlendi: v1.3.0 release dokümanı)
+  - Desktop Target: `C:\Users\Anil\Desktop\TulpiFlow.apk` (Compiled via GitHub Actions Run `36952390544`, size: 4,189,873 bytes)
+- **Action Summary:**
+  1. Güvenlik ve Giriş Ekranı Temizliği: Giriş arayüzünden, alt bilgi (footer) alanından ve placeholder metinlerinden tüm şifreler (7799 / 2026 vb.) tamamen kazındı. Giriş alanı minimalist PIN/Parola kutusu ve tek bir onay butonu haline getirildi. Başarılı doğrulamada oturum `localStorage`, `cookie` ve `Capacitor Preferences` üzerine kalıcı olarak mühürlendi; sonraki açılışlarda giriş ekranı kesinlikle tekrar çıkmayacak şekilde yapılandırıldı.
+  2. Mobil Bilgi Mimarisi & Akordeon / Panel Düzeni (About Face & Refactoring UI):
+     - Sonsuz aşağı kaydırma (doom-scrolling) ortadan kaldırıldı: 46 konuluk YKS müfredat ağacı 8 ana ders akordeonu içine alındı; kullanıcı tıkladığında akıcı animasyon ve dönen chevron ile açılıyor.
+     - Sekmeli / Kartlı Görünüm (Segmented Navigation): Fadime'nin çalışma alanı [Odak & Sayaç] | [YKS Müfredatı] | [Koç & Notlar] şeklinde 3 odaklı alt panele bölündü.
+  3. In-App Update ve 404 Hatasının Çözümü:
+     - GitHub deposu genel erişime (public) açılarak harici yönlendirmelerdeki 404 hatası ve web sayfasına yönlendirme (`window.open`) tamamen kaldırıldı.
+     - Yerel İndirme ve Yükleme Motoru (In-App Installer): Kullanıcı "Güncellemeleri Al" butonuna bastığında uygulama içi ilerleme çubuğu açılıyor; dosya arka planda stream edilip `application/vnd.android.package-archive` MIME türü ile doğrudan yerel Android Paket Yükleyicisi tetikleniyor.
+  4. Sürüm v1.3.0 Mühürlemesi: Firestore `app_config/version` dokümanı en güncel v1.3.0 sürüm bilgileriyle mühürlendi.
+  5. Senkronizasyon, CI/CD ve Masaüstü Teslimatı: `npx cap sync android` çalıştırıldı, GitHub'a aktarıldı, GitHub Actions (`36952390544`) derlemesi başarıyla tamamlandı ve `C:\Users\Anil\Desktop\TulpiFlow.apk` dosyası masaüstüne teslim edildi.
+- **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
+---
+
