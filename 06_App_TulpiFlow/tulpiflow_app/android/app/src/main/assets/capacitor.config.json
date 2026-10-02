@@ -1,0 +1,13 @@
+{
+	"appId": "com.tulpigo.flow",
+	"appName": "TulpiFlow",
+	"webDir": "www",
+	"bundledWebRuntime": false,
+	"server": {
+		"androidScheme": "https"
+	},
+	"android": {
+		"allowMixedContent": true,
+		"backgroundColor": "#060911"
+	}
+}
