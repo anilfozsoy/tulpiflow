@@ -1264,6 +1264,43 @@ body {
   cursor: pointer;
 }
 
+.subtopic-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+.subtopic-row:hover {
+  background: var(--bg-surface-3);
+}
+.subtopic-row .subtopic-item {
+  flex: 1;
+}
+.subtopic-yt-btn {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.65;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.subtopic-yt-btn:hover {
+  opacity: 1;
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.05);
+}
+
 .teacher-chips {
   display: flex;
   gap: 4px;

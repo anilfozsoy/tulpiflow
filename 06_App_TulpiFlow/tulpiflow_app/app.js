@@ -11,8 +11,8 @@
   // =========================================================================
   // 1. CONFIGURATION, VERSIONS & AUTH CONSTANTS
   // =========================================================================
-  const CURRENT_APP_VERSION = "1.1.0";
-  const CURRENT_VERSION = "1.1.0";
+  const CURRENT_APP_VERSION = "1.2.0";
+  const CURRENT_VERSION = "1.2.0";
   const AUTH_KEY = 'tulpiflow_auth_device';
   const AUTH_TOKEN_KEY = 'tulpiflow_auth_token';
   const THEME_KEY = 'tulpiflow_theme';
@@ -456,12 +456,30 @@
 
     // 3. Listen to 'app_data' (Curriculum & Mistakes & Sprints)
     db.collection('app_data').doc('curriculum').onSnapshot((doc) => {
-      if (doc.exists && doc.data().topicTree) {
-        state.topicTree = doc.data().topicTree;
+      if (doc.exists && doc.data().topicTree && doc.data().topicTree.length > 0) {
+        const cloudTree = doc.data().topicTree;
+        if (typeof YKS_CURRICULUM !== 'undefined') {
+          const completedMap = {};
+          cloudTree.forEach(top => {
+            (top.subtopics || []).forEach(sub => {
+              if (sub.completed) completedMap[sub.id] = true;
+            });
+          });
+          const mergedTree = JSON.parse(JSON.stringify(YKS_CURRICULUM));
+          mergedTree.forEach(top => {
+            (top.subtopics || []).forEach(sub => {
+              if (completedMap[sub.id]) sub.completed = true;
+            });
+          });
+          state.topicTree = mergedTree;
+        } else {
+          state.topicTree = cloudTree;
+        }
         renderTopicTree();
+        updateStudentOverview();
       } else {
         if (typeof YKS_CURRICULUM !== 'undefined') {
-          db.collection('app_data').doc('curriculum').set({ topicTree: YKS_CURRICULUM });
+          db.collection('app_data').doc('curriculum').set({ topicTree: YKS_CURRICULUM, version: "1.2.0" });
         }
       }
     }, (err) => console.warn('Curriculum snapshot error:', err));
@@ -557,32 +575,32 @@
     db.collection('app_config').doc('version').onSnapshot((doc) => {
       if (doc.exists) {
         const data = doc.data();
-        const latestVersion = data.latest_version || data.version || "1.1.0";
+        const latestVersion = data.latest_version || data.version || "1.2.0";
         const changelog = data.changelog || [
-          "Asimetrik çalışma alanları (Anıl & Fadime ayrımı)",
-          "Eksiksiz güncel YKS (TYT/AYT) müfredatı ve YouTube hoca entegrasyonu",
-          "Media Session API ile arka planda çalışan Focus Shield ses motoru",
-          "İnteraktif adım adım uygulama rehberi (Tutorial)",
-          "Dark / Light tema desteği ve minimal Refactoring UI arayüzü"
+          "Eksiksiz 2026-2027 MEB/ÖSYM YKS Müfredatı (TYT + AYT Sayısal tüm dersler) entegre edildi.",
+          "Tüm ders ve konulara en popüler YouTube hocalarının doğrudan ders bağlantıları bağlandı.",
+          "Arayüz taşma hataları ve tasarım standartları optimize edildi.",
+          "Arka plan Focus Shield ses kontrolleri iyileştirildi."
         ];
-        const downloadUrl = data.download_url || "https://github.com/anilfozsoy/tulpiflow/releases/latest";
+        const downloadUrl = data.apk_download_url || data.download_url || "https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk";
 
-        if (isNewerVersion(latestVersion, CURRENT_APP_VERSION)) {
+        if (isNewerVersion(latestVersion, CURRENT_VERSION)) {
           showUpdateModal(latestVersion, changelog, downloadUrl);
         }
       } else {
         const initialConfig = {
-          version: "1.1.0",
-          latest_version: "1.1.0",
+          version: "1.2.0",
+          latest_version: "1.2.0",
+          release_date: "2026-10-02",
+          apk_download_url: "https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk",
+          download_url: "https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk",
           changelog: [
-            "Asimetrik çalışma alanları (Anıl & Fadime ayrımı)",
-            "Eksiksiz güncel YKS (TYT/AYT) müfredatı ve YouTube hoca entegrasyonu",
-            "Media Session API ile arka planda çalışan Focus Shield ses motoru",
-            "İnteraktif adım adım uygulama rehberi (Tutorial)",
-            "Dark / Light tema desteği ve minimal Refactoring UI arayüzü"
+            "Eksiksiz 2026-2027 MEB/ÖSYM YKS Müfredatı (TYT + AYT Sayısal tüm dersler) entegre edildi.",
+            "Tüm ders ve konulara en popüler YouTube hocalarının doğrudan ders bağlantıları bağlandı.",
+            "Arayüz taşma hataları ve tasarım standartları optimize edildi.",
+            "Arka plan Focus Shield ses kontrolleri iyileştirildi."
           ],
-          download_url: "https://github.com/anilfozsoy/tulpiflow/releases/latest",
-          releaseDate: new Date().toISOString()
+          force_update: false
         };
         db.collection('app_config').doc('version').set(initialConfig).catch(err => {
           console.warn('Initial app_config seed error:', err);
@@ -847,12 +865,26 @@
   // =========================================================================
   // 9. YKS MÜFREDATI & YOUTUBE DEEP-LINKING MOTORU
   // =========================================================================
-  function openYouTube(query) {
-    if (!query) return;
-    const cleanQuery = encodeURIComponent(query);
-    // Attempt mobile intent first, fallback to https URL
-    const webUrl = `https://www.youtube.com/results?search_query=${cleanQuery}`;
-    window.open(webUrl, '_blank');
+  function openYouTube(query, explicitIntent, explicitWeb) {
+    if (!query && !explicitIntent && !explicitWeb) return;
+    const cleanQuery = encodeURIComponent(query || '');
+    const intentUrl = explicitIntent || `vnd.youtube://results?q=${cleanQuery}`;
+    const webUrl = explicitWeb || `https://www.youtube.com/results?search_query=${cleanQuery}`;
+
+    // On mobile / Android webview (Capacitor), try intent first, fallback to browser
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      try {
+        window.location.href = intentUrl;
+        setTimeout(() => {
+          window.open(webUrl, '_blank');
+        }, 750);
+      } catch (e) {
+        window.open(webUrl, '_blank');
+      }
+    } else {
+      window.open(webUrl, '_blank');
+    }
   }
 
   function renderTopicTree() {
@@ -885,22 +917,33 @@
       const card = document.createElement('div');
       card.className = 'topic-card';
 
-      const defaultQuery = topic.teachers && topic.teachers[0] ? topic.teachers[0].query : `${topic.title} YKS`;
+      const defaultTeacher = topic.teachers && topic.teachers[0] ? topic.teachers[0] : null;
+      const defaultQuery = defaultTeacher ? defaultTeacher.query : `${topic.title} YKS`;
+      const defaultIntent = defaultTeacher && defaultTeacher.intentUrl ? defaultTeacher.intentUrl : `vnd.youtube://results?q=${encodeURIComponent(defaultQuery)}`;
+      const defaultWeb = defaultTeacher && defaultTeacher.webUrl ? defaultTeacher.webUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(defaultQuery)}`;
 
       let subtopicsHtml = '';
       (topic.subtopics || []).forEach(sub => {
+        const subIntent = sub.intentUrl || '';
+        const subWeb = sub.webUrl || '';
+        const subQuery = sub.query || `${sub.title} YKS`;
         subtopicsHtml += `
-          <label class="subtopic-item ${sub.completed ? 'completed' : ''}" data-sub-id="${sub.id}">
-            <input type="checkbox" ${sub.completed ? 'checked' : ''} data-subtopic-check="${sub.id}">
-            <span>${sub.title}</span>
-          </label>
+          <div class="subtopic-row">
+            <label class="subtopic-item ${sub.completed ? 'completed' : ''}" data-sub-id="${sub.id}">
+              <input type="checkbox" ${sub.completed ? 'checked' : ''} data-subtopic-check="${sub.id}">
+              <span>${sub.title}</span>
+            </label>
+            <button class="subtopic-yt-btn" data-yt-query="${subQuery}" data-yt-intent="${subIntent}" data-yt-web="${subWeb}" title="${sub.title} YouTube Dersi">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+            </button>
+          </div>
         `;
       });
 
       let teacherChipsHtml = '';
       (topic.teachers || []).forEach(tch => {
         teacherChipsHtml += `
-          <span class="teacher-chip" data-yt-query="${tch.query}">▶ ${tch.name}</span>
+          <span class="teacher-chip" data-yt-query="${tch.query}" data-yt-intent="${tch.intentUrl || ''}" data-yt-web="${tch.webUrl || ''}">▶ ${tch.name}</span>
         `;
       });
 
@@ -910,7 +953,7 @@
             <span class="topic-category-badge">${topic.categoryLabel || topic.category}</span>
             <h4>${topic.title}</h4>
           </div>
-          <button class="yt-btn" data-yt-query="${defaultQuery}" title="YouTube Dersi İzle">
+          <button class="yt-btn" data-yt-query="${defaultQuery}" data-yt-intent="${defaultIntent}" data-yt-web="${defaultWeb}" title="YouTube Dersi İzle">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
             <span>İzle</span>
           </button>
@@ -937,7 +980,9 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const q = btn.getAttribute('data-yt-query');
-        openYouTube(q);
+        const intent = btn.getAttribute('data-yt-intent');
+        const web = btn.getAttribute('data-yt-web');
+        openYouTube(q, intent, web);
       });
     });
   }
