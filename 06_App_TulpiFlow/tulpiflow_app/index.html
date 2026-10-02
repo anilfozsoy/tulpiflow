@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>TulpiFlow — Asymmetric Co-Working & Accountability Engine</title>
-  <meta name="description" content="TulpiFlow: Anıl & Fadime Asimetrik Çalışma, YKS Müfredatı, YouTube Entegrasyonu ve Bilişsel Odak Sistemi">
-  <meta name="theme-color" content="#090d16">
+  <title>TulpiFlow v2.0 — Asymmetric Co-Working & Accountability Engine</title>
+  <meta name="description" content="TulpiFlow v2.0: Anıl & Fadime Asimetrik Çalışma, YKS Müfredatı, TYT-AYT Deneme Motoru, Medya Bildirimi ve Bilişsel Odak Sistemi">
+  <meta name="theme-color" content="#060911">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
@@ -25,13 +25,13 @@
   <div id="wow-splash-overlay" class="wow-splash">
     <canvas id="splash-canvas"></canvas>
     <div class="splash-content">
-      <div class="splash-badge">TULPIFLOW COGNITIVE OPERATING SYSTEM</div>
+      <div class="splash-badge">TULPIFLOW v2.0 COGNITIVE OPERATING SYSTEM</div>
       <div class="splash-title-container">
         <h1 class="splash-text-glow" id="splash-animated-text">
           <span class="brand-clean-tulpi">tulpi</span><span class="brand-clean-flow">flow</span>
         </h1>
       </div>
-      <p class="splash-subtitle">Asymmetric Co-Working & Degree Focus Engine</p>
+      <p class="splash-subtitle">Asymmetric Co-Working, YKS Exam Engine & Degree Focus</p>
       <div class="splash-status-pill">
         <span class="pulse-dot"></span>
         <span id="splash-status-label">Bulut Ağına Bağlanılıyor...</span>
@@ -80,7 +80,7 @@
         </div>
         <div>
           <h3>Yeni Güncelleme Mevcut</h3>
-          <p id="update-version-label" class="update-ver-tag">v1.3.0 Hazır</p>
+          <p id="update-version-label" class="update-ver-tag">v2.0.0 Hazır</p>
         </div>
       </div>
       <div class="update-body">
@@ -110,18 +110,19 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 3. INTERACTIVE SPOTLIGHT TUTORIAL (STEP-BY-STEP COACHMARK)                -->
+  <!-- 3. NON-BLOCKING ELEGANT MICRO-TOOLTIP TOUR                                -->
   <!-- ========================================================================= -->
-  <div id="tutorial-overlay" class="tutorial-overlay hidden">
-    <div class="tutorial-backdrop" id="tutorial-backdrop"></div>
-    <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
-    <div class="tutorial-card" id="tutorial-card">
-      <div class="tutorial-step-tag" id="tutorial-step-tag">ADIM 1 / 5</div>
-      <h4 class="tutorial-title" id="tutorial-title">Odak Sayacı (Pomodoro)</h4>
-      <p class="tutorial-desc" id="tutorial-desc">Burası senin odak sayacın. 25/5 veya 50/10 döngüleriyle derin çalışmanı başlatabilirsin.</p>
-      <div class="tutorial-actions">
-        <button id="tutorial-skip-btn" class="secondary-btn btn-sm">Rehberi Kapat</button>
-        <button id="tutorial-next-btn" class="primary-btn btn-sm">Sonraki Adım ➔</button>
+  <div id="tutorial-tooltip-container" class="tutorial-tooltip-wrap hidden">
+    <div class="tutorial-tooltip-card elevation-card" id="tutorial-tooltip-card">
+      <div class="tooltip-header">
+        <span class="tooltip-badge" id="tutorial-step-tag">ADIM 1 / 5</span>
+        <button id="tutorial-skip-btn" class="tooltip-close-btn" title="Rehberi Kapat">✕</button>
+      </div>
+      <h4 class="tooltip-title" id="tutorial-title">Odak Sayacı (Pomodoro)</h4>
+      <p class="tooltip-desc" id="tutorial-desc">Burası senin odak ve deneme sayacın. 25/5, 50/10 döngüleri veya TYT/AYT deneme sınavlarını tek tıkla başlatabilirsin.</p>
+      <div class="tooltip-actions">
+        <button id="tutorial-prev-btn" class="secondary-btn btn-sm hidden">❮ Geri</button>
+        <button id="tutorial-next-btn" class="primary-btn btn-sm">Sonraki ➔</button>
       </div>
     </div>
   </div>
@@ -131,11 +132,10 @@
   <!-- ========================================================================= -->
   <div id="app-shell" class="app-shell">
 
-    <!-- Top Navigation Header (Refactored: Zero AI Slop, Pure Functionality) -->
+    <!-- Top Navigation Header -->
     <header class="app-header">
       <div class="header-left">
-        <button id="re-trigger-splash" class="brand-badge-btn" title="TulpiFlow">
-          <!-- Geometric Tulip SVG (1.5px stroke) -->
+        <button id="re-trigger-splash" class="brand-badge-btn" title="TulpiFlow v2.0">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="brand-tulip-svg">
             <path d="M12 22v-8"/>
             <path d="M12 14C7.5 14 5 9.5 5 5c3 0 5.5 2 7 5 1.5-3 4-5 7-5 0 4.5-2.5 9-7 9z"/>
@@ -156,13 +156,12 @@
         <span class="live-pulse-dot" id="network-status-dot" title="Cloud Firestore Canlı Senkronize"></span>
 
         <!-- Focus Shield Button -->
-        <button id="ambient-sound-toggle" class="header-icon-btn" title="Focus Shield: Yağmur & Pembe Gürültü Sentezleyici">
+        <button id="ambient-sound-toggle" class="header-icon-btn" title="Focus Shield: Yağmur, Ateş, Dalga ve Pembe Gürültü Sentezleyici">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 16.5 8 7 7 0 0 0 3 13.5 5 5 0 0 0 7.5 21h12a4.5 4.5 0 0 0 .5-4.8z"></path></svg>
         </button>
 
         <!-- Theme Toggle (Dark / Light) -->
         <button id="theme-toggle-btn" class="header-icon-btn" title="Koyu / Açık Tema Değiştir">
-          <!-- Moon Icon (in dark mode) / Sun Icon (in light mode) -->
           <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           <svg id="theme-icon-sun" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
         </button>
@@ -193,8 +192,8 @@
       </div>
     </header>
 
-    <!-- MAIN SCROLLABLE CONTENT AREA -->
-    <main class="main-content">
+    <!-- MAIN SCROLLABLE CONTENT AREA (SWIPE-ENABLED VIEWPORT) -->
+    <main class="main-content main-viewport" id="main-viewport">
 
       <!-- =================================================================== -->
       <!-- PANE 1: FADIME'S ASYMMETRIC SPACE (YKS 2026 DEGREE FOCUS)           -->
@@ -207,7 +206,7 @@
             <span class="status-indicator-dot online"></span>
             <span id="mentor-presence-text">Anıl: Deep Work Modu (Aktif)</span>
           </div>
-          <span class="mentor-status-quote" id="mentor-status-quote">"Her çözülen soru seni hedefine bir adım daha yaklaştırır."</span>
+          <span class="mentor-status-quote" id="mentor-status-quote">"Her çözülen soru ve deneme seni hedefine bir adım daha yaklaştırır."</span>
         </div>
 
         <!-- Emergency SOS Alert Banner (if active) -->
@@ -222,11 +221,11 @@
           <button id="resolve-sos-btn" class="secondary-btn btn-sm">Çözüldü İşaretle</button>
         </div>
 
-        <!-- Fadime Segmented Sub-Navigation (About Face Anti-Doom-Scrolling Architecture) -->
+        <!-- Fadime Segmented Sub-Navigation -->
         <div class="workspace-segmented-bar" id="fadime-subtabs-bar">
           <button class="ws-seg-btn active" data-subtab="focus">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>Odak & Sayaç</span>
+            <span>Odak & Deneme</span>
           </button>
           <button class="ws-seg-btn" data-subtab="curriculum">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -239,14 +238,24 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- SUBPANE 1: ODAK & SAYAÇ                                             -->
+        <!-- SUBPANE 1: ODAK & DENEME SAYAÇLARI                                  -->
         <!-- =================================================================== -->
         <div id="subpane-focus" class="subpane active">
-          <!-- Fadime Circular Pomodoro Card -->
+          <!-- Main Focus & Exam Mode Card -->
           <div class="focus-card elevation-card" id="timer-card-target">
             <div class="card-header">
-              <span class="header-tag">FADİME — ODAKLANMA ALANI</span>
+              <span class="header-tag" id="timer-card-header-tag">FADİME — ODAK & DENEME MOTORU</span>
               <span class="session-badge" id="fadime-status-badge">Serbest Çalışma</span>
+            </div>
+
+            <!-- Top Mode Switcher: Pomodoro vs Deneme Sınavı -->
+            <div class="engine-mode-switcher">
+              <button class="engine-tab-btn active" id="mode-tab-pomodoro" data-engine="pomodoro">
+                ⏱️ Pomodoro / Serbest Odak
+              </button>
+              <button class="engine-tab-btn" id="mode-tab-exam" data-engine="exam">
+                📝 YKS Deneme Sınavı Modu (TYT/AYT)
+              </button>
             </div>
 
             <!-- Modern Circular Progress Timer -->
@@ -262,31 +271,63 @@
                 </div>
               </div>
 
-              <!-- iOS Style Segmented Control -->
-              <div class="segmented-control">
+              <!-- Pomodoro Mode Selector (Shown in Pomodoro Mode) -->
+              <div class="segmented-control" id="pomodoro-segmented-controls">
                 <button class="seg-btn active" data-mode="25-5">25/5m</button>
                 <button class="seg-btn" data-mode="50-10">50/10m</button>
-                <button class="seg-btn" data-mode="deepwork">Deep Work ∞</button>
+                <button class="seg-btn" data-mode="deepwork">Deep Work 90m</button>
+              </div>
+
+              <!-- Exam Mode Selector (Shown in Exam Mode) -->
+              <div class="segmented-control hidden" id="exam-segmented-controls">
+                <button class="seg-btn active" data-exam-mode="tyt">TYT (165 dk)</button>
+                <button class="seg-btn" data-exam-mode="ayt">AYT (180 dk)</button>
+                <button class="seg-btn" data-exam-mode="branch">Branş Denemesi</button>
+              </div>
+
+              <!-- Branch Exam Custom Duration Input -->
+              <div class="branch-custom-box hidden" id="branch-custom-box">
+                <label for="branch-duration-input">Branş Sınav Süresi (dk):</label>
+                <input type="number" id="branch-duration-input" value="45" min="10" max="180">
+                <input type="text" id="branch-name-input" placeholder="Branş: Örn. TYT Matematik Branş" value="Branş Denemesi">
               </div>
 
               <div class="timer-actions">
                 <button id="timer-start-pause-btn" class="primary-btn">Başlat ▷</button>
                 <button id="timer-reset-btn" class="ghost-btn">Sıfırla ↺</button>
+                <button id="finish-exam-now-btn" class="secondary-btn hidden" style="border-color: var(--emerald); color: var(--emerald);">Sınavı Bitir & Netleri Gir ➔</button>
               </div>
             </div>
 
-            <!-- Focus Stats Row -->
+            <!-- Ambient Sound Focus Shield Panel -->
+            <div class="ambient-sound-panel" id="ambient-sound-panel">
+              <div class="sound-panel-head">
+                <div class="sound-panel-title">
+                  <span class="sound-icon-wave">🎧</span>
+                  <span>Focus Shield Odak Sesleri (Arka Planda Kesintisiz)</span>
+                </div>
+                <button id="sound-play-toggle-btn" class="sound-toggle-btn">Oynat ▷</button>
+              </div>
+              <div class="sound-modes-grid">
+                <button class="sound-chip active" data-sound="rain">🌧️ Gece Yağmuru</button>
+                <button class="sound-chip" data-sound="campfire">🔥 Kamp Ateşi</button>
+                <button class="sound-chip" data-sound="ocean">🌊 Okyanus Dalgası</button>
+                <button class="sound-chip" data-sound="noise">☕ Pembe Gürültü</button>
+              </div>
+            </div>
+
+            <!-- Focus Stats Row (CLEAN ZERO-STATE DEFAULT) -->
             <div class="stats-row">
               <div class="stat-box">
-                <span class="stat-num" id="fadime-today-minutes">125 dk</span>
+                <span class="stat-num" id="fadime-today-minutes">0 dk</span>
                 <span class="stat-desc">Bugünkü Odak</span>
               </div>
               <div class="stat-box">
-                <span class="stat-num" id="fadime-streak-days">14 Gün</span>
+                <span class="stat-num" id="fadime-streak-days">0 Gün</span>
                 <span class="stat-desc">Günlük Streak</span>
               </div>
               <div class="stat-box">
-                <span class="stat-num" id="fadime-completed-tasks">18 / 24</span>
+                <span class="stat-num" id="fadime-completed-tasks">0 / 0</span>
                 <span class="stat-desc">Haftalık Görevler</span>
               </div>
             </div>
@@ -297,6 +338,21 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                 <span>Tıkandım / Mentöre Bildir (S.O.S.)</span>
               </button>
+            </div>
+          </div>
+
+          <!-- YKS Deneme Sınavı Sonuçları ve Net Geçmişi Kartı -->
+          <div class="exam-history-card elevation-card" style="margin-top: 14px;">
+            <div class="section-top">
+              <div>
+                <h3 class="section-title">📊 Tamamlanan YKS Denemeleri & Net Takibi</h3>
+                <p class="section-desc">Çözdüğün TYT ve AYT denemelerinin ders bazlı doğru-yanlış analizleri ve net tablosu.</p>
+              </div>
+              <button id="manual-add-exam-btn" class="primary-btn btn-sm">+ Manuel Net Gir</button>
+            </div>
+
+            <div class="exam-history-list" id="fadime-exam-history-list">
+              <!-- Populated dynamically -->
             </div>
           </div>
         </div>
@@ -311,17 +367,21 @@
                 <h3 class="section-title">YKS (TYT/AYT) Müfredatı & YouTube Ders Motoru</h3>
                 <p class="section-desc">Ders seçerek üniteleri ve YouTube derslerini akordeon panelinden inceleyin.</p>
               </div>
-              <div class="filter-pills" id="topic-category-filters">
-                <button class="filter-pill active" data-cat="all">Tümü</button>
-                <button class="filter-pill" data-cat="tyt-turkce">TYT Türkçe</button>
-                <button class="filter-pill" data-cat="tyt-sosyal">TYT Sosyal</button>
-                <button class="filter-pill" data-cat="tyt-matematik">TYT Mat & Geo</button>
-                <button class="filter-pill" data-cat="tyt-fen">TYT Fen</button>
-                <button class="filter-pill" data-cat="ayt-matematik">AYT Mat & Geo</button>
-                <button class="filter-pill" data-cat="ayt-fizik">AYT Fizik</button>
-                <button class="filter-pill" data-cat="ayt-kimya">AYT Kimya</button>
-                <button class="filter-pill" data-cat="ayt-biyoloji">AYT Biyoloji</button>
+              <div class="curriculum-top-actions">
+                <button id="open-add-custom-topic-btn" class="primary-btn btn-sm">+ Yeni Alt Konu Ekle</button>
               </div>
+            </div>
+
+            <div class="filter-pills" id="topic-category-filters">
+              <button class="filter-pill active" data-cat="all">Tümü</button>
+              <button class="filter-pill" data-cat="tyt-turkce">TYT Türkçe</button>
+              <button class="filter-pill" data-cat="tyt-sosyal">TYT Sosyal</button>
+              <button class="filter-pill" data-cat="tyt-matematik">TYT Mat & Geo</button>
+              <button class="filter-pill" data-cat="tyt-fen">TYT Fen</button>
+              <button class="filter-pill" data-cat="ayt-matematik">AYT Mat & Geo</button>
+              <button class="filter-pill" data-cat="ayt-fizik">AYT Fizik</button>
+              <button class="filter-pill" data-cat="ayt-kimya">AYT Kimya</button>
+              <button class="filter-pill" data-cat="ayt-biyoloji">AYT Biyoloji</button>
             </div>
 
             <!-- Master Progress Bar -->
@@ -351,7 +411,7 @@
             <div class="coach-tasks-card elevation-card" id="mentor-tasks-target">
               <div class="card-header">
                 <span class="header-tag">⭐ ANIL'DAN GELEN KOÇ GÖREVLERİ</span>
-                <span class="badge-pill" id="coach-task-count-badge">2 Bekleyen</span>
+                <span class="badge-pill" id="coach-task-count-badge">0 Bekleyen</span>
               </div>
               <p class="card-intro">Mentörün Anıl tarafından sana özel atanan öncelikli çalışma hedefleri:</p>
               
@@ -414,6 +474,16 @@
       <!-- =================================================================== -->
       <section id="pane-anil" class="tab-pane">
         
+        <!-- Live Mentor Alert Banner (Fadime completes topic or exam) -->
+        <div id="mentor-live-alert-banner" class="mentor-alert-banner hidden">
+          <div class="mentor-alert-icon">🎉</div>
+          <div class="mentor-alert-body">
+            <h4 id="mentor-alert-title">Fadime Yeni Bir Başarıya İmza Attı!</h4>
+            <p id="mentor-alert-desc">Fadime TYT Denemesini tamamladı: Toplam 94.50 Net</p>
+          </div>
+          <button id="dismiss-mentor-alert-btn" class="ghost-btn btn-sm">Kapat ✕</button>
+        </div>
+
         <!-- Fadime Real-Time Monitoring & Task Delegation Hero Card -->
         <div class="mentor-overview-card elevation-card">
           <div class="card-header">
@@ -423,15 +493,15 @@
 
           <div class="overview-metrics-grid">
             <div class="stat-box">
-              <span class="stat-num" id="overview-fadime-minutes">125 dk</span>
+              <span class="stat-num" id="overview-fadime-minutes">0 dk</span>
               <span class="stat-desc">Bugünkü Odak</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num" id="overview-fadime-streak">14 Gün</span>
+              <span class="stat-num" id="overview-fadime-streak">0 Gün</span>
               <span class="stat-desc">Günlük Streak</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num" id="overview-fadime-topics">48 / 85</span>
+              <span class="stat-num" id="overview-fadime-topics">0 / 0</span>
               <span class="stat-desc">Müfredat Konusu</span>
             </div>
             <div class="stat-box">
@@ -446,8 +516,21 @@
           </div>
         </div>
 
-        <div class="grid-2-col">
-          
+        <!-- Fadime's Exam Performance Feed in Mentor View -->
+        <div class="mentor-exam-feed-card elevation-card" style="margin-top: 14px;">
+          <div class="section-top">
+            <div>
+              <h3 class="section-title">📈 Fadime'nin Canlı Deneme Sınavı Raporları</h3>
+              <p class="section-desc">Fadime'nin çözdüğü en son TYT ve AYT denemelerinin ders bazlı net dökümü.</p>
+            </div>
+            <span class="badge-pill" id="mentor-exam-count-badge">0 Deneme</span>
+          </div>
+          <div class="exam-history-list" id="anil-student-exam-history">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="grid-2-col" style="margin-top: 14px;">
           <!-- Anıl Deep Work & Engineering Card -->
           <div class="focus-card elevation-card">
             <div class="card-header">
@@ -502,7 +585,6 @@
               </button>
             </div>
           </div>
-
         </div>
 
       </section>
@@ -577,11 +659,11 @@
               <h4>Fadime (YKS 2026)</h4>
               <div class="metric-pair">
                 <span>Toplam Odak Süresi:</span>
-                <strong id="heat-fadime-hours">142 Saat</strong>
+                <strong id="heat-fadime-hours">0 Saat</strong>
               </div>
               <div class="metric-pair">
                 <span>Tamamlanan Müfredat:</span>
-                <strong id="heat-fadime-topics">48 Konu</strong>
+                <strong id="heat-fadime-topics">0 Konu</strong>
               </div>
             </div>
 
@@ -589,11 +671,11 @@
               <h4>Anıl (Dev & Math)</h4>
               <div class="metric-pair">
                 <span>Toplam Derin Çalışma:</span>
-                <strong id="heat-anil-hours">186 Saat</strong>
+                <strong id="heat-anil-hours">0 Saat</strong>
               </div>
               <div class="metric-pair">
                 <span>Tamamlanan Mimari Sprint:</span>
-                <strong id="heat-anil-sprints">32 Modül</strong>
+                <strong id="heat-anil-sprints">0 Modül</strong>
               </div>
             </div>
           </div>
@@ -630,7 +712,7 @@
     <div class="celebration-card elevation-modal">
       <div class="celebration-badge">GÖREV BAŞARIYLA TAMAMLANDI</div>
       <h2 id="celebration-title" class="celebration-title">Tebrikler Fadime</h2>
-      <p id="celebration-desc" class="celebration-desc">Türevde Geometrik Yorum konusunu başarıyla tamamladın! Çalışma ivmen hedefine doğru kararlılıkla ilerliyor.</p>
+      <p id="celebration-desc" class="celebration-desc">Konuyu başarıyla tamamladın! Çalışma ivmen hedefine doğru kararlılıkla ilerliyor.</p>
       
       <div class="celebration-meta-pill">
         <span>Günlük Streak: <strong>+1 Gün Eklendi</strong></span>
@@ -642,7 +724,105 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 6. TASK & MISTAKE MODALS                                                  -->
+  <!-- 6. YKS DENEME SINAV BİTİŞ & NET GİRİŞ KARTI MODAL                          -->
+  <!-- ========================================================================= -->
+  <div id="exam-result-modal-overlay" class="modal-overlay hidden">
+    <div class="task-modal-card elevation-modal exam-modal-card">
+      <div class="modal-head">
+        <div class="modal-head-title">
+          <h3>📝 Sınav Bitiş & Net Kartı</h3>
+          <span class="badge-pill" id="modal-exam-type-badge">TYT Denemesi</span>
+        </div>
+        <button class="close-modal-btn" data-close="exam-result-modal-overlay">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="exam-form-row">
+          <label for="exam-name-input">Deneme Adı / Yayın:</label>
+          <input type="text" id="exam-name-input" placeholder="Örn: 3D Türkiye Geneli TYT Denemesi 1">
+        </div>
+
+        <div class="exam-type-selector-row">
+          <label>Sınav Türü:</label>
+          <div class="segmented-control" style="margin-top: 4px;">
+            <button type="button" class="exam-type-btn active" data-type="tyt">TYT (120 Soru)</button>
+            <button type="button" class="exam-type-btn" data-type="ayt">AYT (80 Soru)</button>
+            <button type="button" class="exam-type-btn" data-type="branch">Branş Denemesi</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Course Inputs based on Exam Type -->
+        <div id="exam-courses-container" class="exam-courses-grid">
+          <!-- Populated dynamically: D/Y inputs per course -->
+        </div>
+
+        <!-- Live Net Summary Display -->
+        <div class="exam-net-summary-box">
+          <div class="net-summary-item">
+            <span class="summary-label">Toplam Doğru</span>
+            <span class="summary-val text-emerald" id="modal-total-correct">0</span>
+          </div>
+          <div class="net-summary-item">
+            <span class="summary-label">Toplam Yanlış</span>
+            <span class="summary-val text-danger" id="modal-total-wrong">0</span>
+          </div>
+          <div class="net-summary-item primary-net-box">
+            <span class="summary-label">HESAPLANAN NET</span>
+            <span class="summary-val text-primary" id="modal-total-net">0.00</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="secondary-btn" data-close="exam-result-modal-overlay">Vazgeç</button>
+          <button id="save-exam-result-btn" class="primary-btn">Sonucu Kaydet & Koça İlet ➔</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 7. YENİ ALT KONU EKLE MODAL                                               -->
+  <!-- ========================================================================= -->
+  <div id="add-custom-topic-modal-overlay" class="modal-overlay hidden">
+    <div class="task-modal-card elevation-modal">
+      <div class="modal-head">
+        <h3>+ Müfredata Özel Alt Konu Ekle</h3>
+        <button class="close-modal-btn" data-close="add-custom-topic-modal-overlay">✕</button>
+      </div>
+      <div class="modal-body">
+        <label for="custom-topic-subject-select">Ders Seçin:</label>
+        <select id="custom-topic-subject-select">
+          <option value="tyt-turkce">TYT Türkçe</option>
+          <option value="tyt-sosyal">TYT Sosyal Bilimler</option>
+          <option value="tyt-matematik">TYT Temel Matematik & Geo</option>
+          <option value="tyt-fen">TYT Fen Bilimleri</option>
+          <option value="ayt-matematik">AYT İleri Matematik & Geo</option>
+          <option value="ayt-fizik">AYT İleri Fizik</option>
+          <option value="ayt-kimya">AYT İleri Kimya</option>
+          <option value="ayt-biyoloji">AYT İleri Biyoloji</option>
+        </select>
+
+        <label for="custom-topic-unit-select">Ünite / Ana Başlık:</label>
+        <select id="custom-topic-unit-select">
+          <!-- Populated based on subject -->
+        </select>
+
+        <label for="custom-topic-title-input">Yeni Alt Konu / Eksik Başlığı:</label>
+        <input type="text" id="custom-topic-title-input" placeholder="Örn: Türevde Hacim ve Maliyet Problemleri">
+
+        <label for="custom-topic-yt-input">İsteğe Bağlı YouTube Arama Terimi:</label>
+        <input type="text" id="custom-topic-yt-input" placeholder="Örn: Eyüp B. Türev Maks Min Problemleri">
+
+        <div class="modal-footer">
+          <button class="secondary-btn" data-close="add-custom-topic-modal-overlay">Vazgeç</button>
+          <button id="save-custom-topic-btn" class="primary-btn">Konuyu Ekle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 8. TASK & MISTAKE MODALS                                                  -->
   <!-- ========================================================================= -->
   <div id="add-task-modal-overlay" class="modal-overlay hidden">
     <div class="task-modal-card elevation-modal">

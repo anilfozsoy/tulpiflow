@@ -28,7 +28,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-1-1",
         "title": "Gerçek, Yan, Mecaz ve Terim Anlam",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Gerçek Yan Mecaz Terim Anlam",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Ger%C3%A7ek%20Yan%20Mecaz%20Terim%20Anlam",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Ger%C3%A7ek%20Yan%20Mecaz%20Terim%20Anlam",
@@ -50,7 +50,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-1-2",
         "title": "Deyimler, Atasözleri ve İkilemeler",
-        "completed": true,
+        "completed": false,
         "query": "Kadir Gümüş Deyimler Atasözleri İkilemeler",
         "intentUrl": "vnd.youtube://results?q=Kadir%20G%C3%BCm%C3%BC%C5%9F%20Deyimler%20Atas%C3%B6zleri%20%C4%B0kilemeler",
         "webUrl": "https://www.youtube.com/results?search_query=Kadir%20G%C3%BCm%C3%BC%C5%9F%20Deyimler%20Atas%C3%B6zleri%20%C4%B0kilemeler",
@@ -116,7 +116,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-2-1",
         "title": "Neden-Sonuç, Amaç-Sonuç ve Koşul Cümleleri",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Neden Sonuç Amaç Koşul",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Neden%20Sonu%C3%A7%20Ama%C3%A7%20Ko%C5%9Ful",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Neden%20Sonu%C3%A7%20Ama%C3%A7%20Ko%C5%9Ful",
@@ -138,7 +138,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-2-2",
         "title": "Örtülü Anlam, Kesin Yargı ve Anlatım Özellikleri",
-        "completed": true,
+        "completed": false,
         "query": "Kadir Gümüş Örtülü Anlam Kesin Yargı",
         "intentUrl": "vnd.youtube://results?q=Kadir%20G%C3%BCm%C3%BC%C5%9F%20%C3%96rt%C3%BCl%C3%BC%20Anlam%20Kesin%20Yarg%C4%B1",
         "webUrl": "https://www.youtube.com/results?search_query=Kadir%20G%C3%BCm%C3%BC%C5%9F%20%C3%96rt%C3%BCl%C3%BC%20Anlam%20Kesin%20Yarg%C4%B1",
@@ -204,7 +204,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-3-1",
         "title": "Ana Fikir ve Yardımcı Fikirler",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Paragrafta Ana Fikir",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Paragrafta%20Ana%20Fikir",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Paragrafta%20Ana%20Fikir",
@@ -226,7 +226,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-3-2",
         "title": "Akışı Bozan Cümle & Paragrafı İkiye Bölme",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Akışı Bozan Cümle",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Ak%C4%B1%C5%9F%C4%B1%20Bozan%20C%C3%BCmle",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20Ak%C4%B1%C5%9F%C4%B1%20Bozan%20C%C3%BCmle",
@@ -292,7 +292,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-4-1",
         "title": "Ünlü Düşmesi, Türemesi ve Daralması",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Ünlü Olayları",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20%C3%9Cnl%C3%BC%20Olaylar%C4%B1",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20%C3%9Cnl%C3%BC%20Olaylar%C4%B1",
@@ -314,7 +314,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-4-2",
         "title": "Ünsüz Benzeşmesi, Yumuşaması ve Düşmesi",
-        "completed": true,
+        "completed": false,
         "query": "Kadir Gümüş Ünsüz Benzeşmesi Yumuşaması",
         "intentUrl": "vnd.youtube://results?q=Kadir%20G%C3%BCm%C3%BC%C5%9F%20%C3%9Cns%C3%BCz%20Benze%C5%9Fmesi%20Yumu%C5%9Famas%C4%B1",
         "webUrl": "https://www.youtube.com/results?search_query=Kadir%20G%C3%BCm%C3%BC%C5%9F%20%C3%9Cns%C3%BCz%20Benze%C5%9Fmesi%20Yumu%C5%9Famas%C4%B1",
@@ -380,7 +380,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-5-1",
         "title": "Kökler (İsim, Fiil, Ortak ve Sesteş Kökler)",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca Kökler İsim Fiil",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20K%C3%B6kler%20%C4%B0sim%20Fiil",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20K%C3%B6kler%20%C4%B0sim%20Fiil",
@@ -468,7 +468,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-6-1",
         "title": "İsim (Ad) ve Sıfat (Ön Ad)",
-        "completed": true,
+        "completed": false,
         "query": "Rüştü Hoca İsim Sıfat",
         "intentUrl": "vnd.youtube://results?q=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20%C4%B0sim%20S%C4%B1fat",
         "webUrl": "https://www.youtube.com/results?search_query=R%C3%BC%C5%9Ft%C3%BC%20Hoca%20%C4%B0sim%20S%C4%B1fat",
@@ -490,7 +490,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-turk-6-2",
         "title": "Zamir (Adıl) ve Zarf (Belirteç)",
-        "completed": true,
+        "completed": false,
         "query": "Kadir Gümüş Zamir Zarf",
         "intentUrl": "vnd.youtube://results?q=Kadir%20G%C3%BCm%C3%BC%C5%9F%20Zamir%20Zarf",
         "webUrl": "https://www.youtube.com/results?search_query=Kadir%20G%C3%BCm%C3%BC%C5%9F%20Zamir%20Zarf",
@@ -1012,7 +1012,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-sos-1-1",
         "title": "Tarih ve Zaman, İnsanlığın İlk Dönemleri",
-        "completed": true,
+        "completed": false,
         "query": "Mehmet Celal Özyıldız Tarih ve Zaman",
         "intentUrl": "vnd.youtube://results?q=Mehmet%20Celal%20%C3%96zy%C4%B1ld%C4%B1z%20Tarih%20ve%20Zaman",
         "webUrl": "https://www.youtube.com/results?search_query=Mehmet%20Celal%20%C3%96zy%C4%B1ld%C4%B1z%20Tarih%20ve%20Zaman",
@@ -1028,7 +1028,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-sos-1-2",
         "title": "Orta Çağ'da Dünya & İlk ve Orta Çağlarda Türk Dünyası",
-        "completed": true,
+        "completed": false,
         "query": "Mehmet Celal Özyıldız İlk Türk Devletleri",
         "intentUrl": "vnd.youtube://results?q=Mehmet%20Celal%20%C3%96zy%C4%B1ld%C4%B1z%20%C4%B0lk%20T%C3%BCrk%20Devletleri",
         "webUrl": "https://www.youtube.com/results?search_query=Mehmet%20Celal%20%C3%96zy%C4%B1ld%C4%B1z%20%C4%B0lk%20T%C3%BCrk%20Devletleri",
@@ -1146,7 +1146,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-sos-3-1",
         "title": "Doğa ve İnsan, Dünya'nın Şekli ve Hareketleri, Coğrafi Konum",
-        "completed": true,
+        "completed": false,
         "query": "Coğrafyanın Kodları Dünyanın Şekli ve Hareketleri",
         "intentUrl": "vnd.youtube://results?q=Co%C4%9Frafyan%C4%B1n%20Kodlar%C4%B1%20D%C3%BCnyan%C4%B1n%20%C5%9Eekli%20ve%20Hareketleri",
         "webUrl": "https://www.youtube.com/results?search_query=Co%C4%9Frafyan%C4%B1n%20Kodlar%C4%B1%20D%C3%BCnyan%C4%B1n%20%C5%9Eekli%20ve%20Hareketleri",
@@ -1478,7 +1478,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-1-1",
         "title": "Sayılar Teorisi (Tek-Çift, Pozitif-Negatif, Asal, Faktöriyel)",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Tek Çift Asal Faktöriyel",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20Tek%20%C3%87ift%20Asal%20Fakt%C3%B6riyel",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20Tek%20%C3%87ift%20Asal%20Fakt%C3%B6riyel",
@@ -1506,7 +1506,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-1-2",
         "title": "Basamak Kavramı ve Sayı Çözümleme",
-        "completed": true,
+        "completed": false,
         "query": "Mert Hoca Basamak Kavramı",
         "intentUrl": "vnd.youtube://results?q=Mert%20Hoca%20Basamak%20Kavram%C4%B1",
         "webUrl": "https://www.youtube.com/results?search_query=Mert%20Hoca%20Basamak%20Kavram%C4%B1",
@@ -1534,7 +1534,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-1-3",
         "title": "Bölme-Bölünebilme Kuralları",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Bölme Bölünebilme",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20B%C3%B6lme%20B%C3%B6l%C3%BCnebilme",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20B%C3%B6lme%20B%C3%B6l%C3%BCnebilme",
@@ -1612,7 +1612,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-2-1",
         "title": "Rasyonel ve Ondalık Sayılar",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Rasyonel Sayılar",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20Rasyonel%20Say%C4%B1lar",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20Rasyonel%20Say%C4%B1lar",
@@ -1634,7 +1634,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-2-2",
         "title": "Basit Eşitsizlikler & Aralık Kavramı",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Basit Eşitsizlikler",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20Basit%20E%C5%9Fitsizlikler",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20Basit%20E%C5%9Fitsizlikler",
@@ -2008,7 +2008,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-mat-5-1",
         "title": "Doğruda ve Üçgende Açılar",
-        "completed": true,
+        "completed": false,
         "query": "Kenan Kara Doğruda ve Üçgende Açılar",
         "intentUrl": "vnd.youtube://results?q=Kenan%20Kara%20Do%C4%9Fruda%20ve%20%C3%9C%C3%A7gende%20A%C3%A7%C4%B1lar",
         "webUrl": "https://www.youtube.com/results?search_query=Kenan%20Kara%20Do%C4%9Fruda%20ve%20%C3%9C%C3%A7gende%20A%C3%A7%C4%B1lar",
@@ -2134,7 +2134,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-fen-1-1",
         "title": "Fizik Bilimine Giriş & Madde ve Özellikleri",
-        "completed": true,
+        "completed": false,
         "query": "VIP Fizik Fizik Bilimine Giriş Madde",
         "intentUrl": "vnd.youtube://results?q=VIP%20Fizik%20Fizik%20Bilimine%20Giri%C5%9F%20Madde",
         "webUrl": "https://www.youtube.com/results?search_query=VIP%20Fizik%20Fizik%20Bilimine%20Giri%C5%9F%20Madde",
@@ -2150,7 +2150,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-fen-1-2",
         "title": "Hareket ve Kuvvet (Newton Yasaları)",
-        "completed": true,
+        "completed": false,
         "query": "VIP Fizik Hareket ve Kuvvet Newton",
         "intentUrl": "vnd.youtube://results?q=VIP%20Fizik%20Hareket%20ve%20Kuvvet%20Newton",
         "webUrl": "https://www.youtube.com/results?search_query=VIP%20Fizik%20Hareket%20ve%20Kuvvet%20Newton",
@@ -2262,7 +2262,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-fen-2-1",
         "title": "Kimya Bilimi, Atom ve Periyodik Sistem",
-        "completed": true,
+        "completed": false,
         "query": "Görkem Şahin Kimya Bilimi Atom Periyodik Sistem",
         "intentUrl": "vnd.youtube://results?q=G%C3%B6rkem%20%C5%9Eahin%20Kimya%20Bilimi%20Atom%20Periyodik%20Sistem",
         "webUrl": "https://www.youtube.com/results?search_query=G%C3%B6rkem%20%C5%9Eahin%20Kimya%20Bilimi%20Atom%20Periyodik%20Sistem",
@@ -2374,7 +2374,7 @@ const YKS_CURRICULUM = [
       {
         "id": "tyt-fen-3-1",
         "title": "Yaşam Bilimi Biyoloji (İnorganik ve Organik Bileşikler)",
-        "completed": true,
+        "completed": false,
         "query": "Dr. Biyoloji Temel Bileşenler",
         "intentUrl": "vnd.youtube://results?q=Dr.%20Biyoloji%20Temel%20Bile%C5%9Fenler",
         "webUrl": "https://www.youtube.com/results?search_query=Dr.%20Biyoloji%20Temel%20Bile%C5%9Fenler",
@@ -2492,7 +2492,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-mat-1-1",
         "title": "İkinci Dereceden Eşitsizlik Sistemleri",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. İkinci Dereceden Eşitsizlikler",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20%C4%B0kinci%20Dereceden%20E%C5%9Fitsizlikler",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20%C4%B0kinci%20Dereceden%20E%C5%9Fitsizlikler",
@@ -2514,7 +2514,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-mat-1-2",
         "title": "Parabol (İkinci Dereceden Fonksiyon Grafikleri)",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Parabol Grafikleri",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20Parabol%20Grafikleri",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20Parabol%20Grafikleri",
@@ -2580,7 +2580,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-mat-2-1",
         "title": "Birim Çember, Trigonometrik Fonksiyonlar ve Özdeşlikler",
-        "completed": true,
+        "completed": false,
         "query": "Eyüp B. Trigonometri Birim Çember",
         "intentUrl": "vnd.youtube://results?q=Ey%C3%BCp%20B.%20Trigonometri%20Birim%20%C3%87ember",
         "webUrl": "https://www.youtube.com/results?search_query=Ey%C3%BCp%20B.%20Trigonometri%20Birim%20%C3%87ember",
@@ -3268,7 +3268,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-fiz-1-1",
         "title": "Vektörler ve Bağıl Hareket",
-        "completed": true,
+        "completed": false,
         "query": "VIP Fizik Vektörler ve Bağıl Hareket",
         "intentUrl": "vnd.youtube://results?q=VIP%20Fizik%20Vekt%C3%B6rler%20ve%20Ba%C4%9F%C4%B1l%20Hareket",
         "webUrl": "https://www.youtube.com/results?search_query=VIP%20Fizik%20Vekt%C3%B6rler%20ve%20Ba%C4%9F%C4%B1l%20Hareket",
@@ -3296,7 +3296,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-fiz-1-2",
         "title": "Newton'ın Hareket Yasaları",
-        "completed": true,
+        "completed": false,
         "query": "Altuğ Güneş Newton Hareket Yasaları AYT",
         "intentUrl": "vnd.youtube://results?q=Altu%C4%9F%20G%C3%BCne%C5%9F%20Newton%20Hareket%20Yasalar%C4%B1%20AYT",
         "webUrl": "https://www.youtube.com/results?search_query=Altu%C4%9F%20G%C3%BCne%C5%9F%20Newton%20Hareket%20Yasalar%C4%B1%20AYT",
@@ -3902,7 +3902,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-kim-1-1",
         "title": "Modern Atom Teorisi (Orbitaller, Kuantum Sayıları, Elektron Dizilimi)",
-        "completed": true,
+        "completed": false,
         "query": "Görkem Şahin Modern Atom Teorisi",
         "intentUrl": "vnd.youtube://results?q=G%C3%B6rkem%20%C5%9Eahin%20Modern%20Atom%20Teorisi",
         "webUrl": "https://www.youtube.com/results?search_query=G%C3%B6rkem%20%C5%9Eahin%20Modern%20Atom%20Teorisi",
@@ -4414,7 +4414,7 @@ const YKS_CURRICULUM = [
       {
         "id": "ayt-biyo-1-1",
         "title": "Sinir Sistemi (İmpuls İletimi, Beyin, Omurilik)",
-        "completed": true,
+        "completed": false,
         "query": "Dr. Biyoloji Sinir Sistemi",
         "intentUrl": "vnd.youtube://results?q=Dr.%20Biyoloji%20Sinir%20Sistemi",
         "webUrl": "https://www.youtube.com/results?search_query=Dr.%20Biyoloji%20Sinir%20Sistemi",

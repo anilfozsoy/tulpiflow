@@ -43,7 +43,8 @@ jobs:
           APK_FILE=$(find . -name "*.apk" | head -n 1)
           if [ -f "$APK_FILE" ]; then
             cp "$APK_FILE" ./TulpiFlow.apk
-            gh release create v1.3.0 ./TulpiFlow.apk --title "TulpiFlow v1.3.0" --notes "TulpiFlow v1.3.0 release from commit $GITHUB_SHA" || gh release upload v1.3.0 ./TulpiFlow.apk --clobber
+            gh release create v2.0.0 ./TulpiFlow.apk --title "TulpiFlow v2.0.0" --notes "TulpiFlow v2.0.0 release from commit $GITHUB_SHA" || gh release upload v2.0.0 ./TulpiFlow.apk --clobber
           else
             echo "No APK found to publish"
           fi
+

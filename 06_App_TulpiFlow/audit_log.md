@@ -172,7 +172,31 @@
      - GitHub deposu genel erişime (public) açılarak harici yönlendirmelerdeki 404 hatası ve web sayfasına yönlendirme (`window.open`) tamamen kaldırıldı.
      - Yerel İndirme ve Yükleme Motoru (In-App Installer): Kullanıcı "Güncellemeleri Al" butonuna bastığında uygulama içi ilerleme çubuğu açılıyor; dosya arka planda stream edilip `application/vnd.android.package-archive` MIME türü ile doğrudan yerel Android Paket Yükleyicisi tetikleniyor.
   4. Sürüm v1.3.0 Mühürlemesi: Firestore `app_config/version` dokümanı en güncel v1.3.0 sürüm bilgileriyle mühürlendi.
-  5. Senkronizasyon, CI/CD ve Masaüstü Teslimatı: `npx cap sync android` çalıştırıldı, GitHub'a aktarıldı, GitHub Actions (`36952390544`) derlemesi başarıyla tamamlandı ve `C:\Users\Anil\Desktop\TulpiFlow.apk` dosyası masaüstüne teslim edildi.
+## [TIMESTAMP: 2026-10-02 14:15:00 UTC+3]
+- **Execution Model:** Gemini 3.8 Flash (High) / Antigravity Autonomous Engine
+- **Prompt Hash / Context ID:** TULPIFLOW-V200-SWIPE-EXAM-ENGINE-MEDIA-ICON-EXE-DELIVERY
+- **Target Files Affected:**
+  - `06_App_TulpiFlow/tulpiflow_app/index.html` & `www/index.html` (Added swipe viewport `#main-viewport`, exam mode switcher, exam modal with auto net calculation, ambient sound panel, non-blocking tooltip, custom subtopic modal, mentor live alert banner, clean zero-state stats)
+  - `06_App_TulpiFlow/tulpiflow_app/styles.css` & `www/styles.css` (Added CSS for horizontal swipe transitions, non-blocking floating tooltip, exam cards, course inputs, net summary pill, 4-chip sound grid, mentor live alert toast)
+  - `06_App_TulpiFlow/tulpiflow_app/app.js` & `www/app.js` (Overhauled: `CURRENT_VERSION = "2.0.0"`, touch gesture swipe detector, clean zero-state seed, 4 generative ambient soundscapes, continuous MediaSession notification card with lock-screen timer updates, dual-engine Pomodoro & Deneme motoru with live net calculation, custom subtopics addition, live mentor alert listener)
+  - `06_App_TulpiFlow/tulpiflow_app/curriculum.js` & `www/curriculum.js` (Sanitized: reset all 31 hardcoded completed flags to false)
+  - `06_App_TulpiFlow/tulpiflow_app/android/app/src/main/res/mipmap-*` (Replaced default Capacitor robot icon with elegant geometric Tulip flower icon across mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi and foregrounds)
+  - `06_App_TulpiFlow/tulpiflow_app/android/app/src/main/res/values/ic_launcher_background.xml` (Set dark `#060911` background)
+  - `06_App_TulpiFlow/tulpiflow_app/TulpiFlowDesktop.cs` (Created C# standalone desktop wrapper)
+  - `06_App_TulpiFlow/tulpiflow_app/generate_tulip_icons.ps1` (Created icon generator for Android & Windows)
+  - `06_App_TulpiFlow/tulpiflow_app/TulpiFlow.exe` (Compiled standalone Windows executable)
+  - `C:\Users\Anil\Desktop\TulpiFlow.exe` (Delivered standalone executable, size: 154,624 bytes)
+  - `.github/workflows/build-apk.yml` (Updated release tag to v2.0.0)
+- **Action Summary:**
+  1. Dokunmatik Kaydırma (Swipe Gesture) & Panel Geçişi: Ana viewport üzerine `touchstart`/`touchend` koordinat dinleyicileri eklendi. Yatay eksende minimum 50px kaydırma hareketi algılandığında paneller arası akıcı CSS `transform: translateX(...)` animasyonu işletildi; üst sekmeler ve alt menü butonları anlık senkronize edildi.
+  2. Sıfır Kurulum (Clean Zero-State) & Rehber Onarımı: Arayüzdeki tüm sahte/hardcoded test verileri ("125 dk", "14 Gün", "18/24" vb.) ve `curriculum.js` içindeki 31 sahte tamamlama bayrağı temizlenerek sıfırlandı. Ekran koordinatlarını bozan eski spotlight rehberi yerine ekranı kaydırmayan, doğrudan elemente odaklanan zarif mikro-ipucu (non-blocking tooltip) turu devreye alındı.
+  3. Spotify / YouTube Music Tarzı Medya Bildirimi & 4 Ses Modu: Android bildirim çekmecesi ve kilit ekranı için `navigator.mediaSession` canlı geri sayım akışı bağlandı. Durdur, Oynat, Kapat eylemleri doğrudan sayacı yönetir hale getirildi. Web Audio API tabanlı 4 döngüsel ses modu entegre edildi: Gece Yağmuru (Rain), Kamp Ateşi (Campfire), Okyanus Dalgası (Ocean Waves), Pembe Gürültü / Kafe Ambiyansı (Focus Noise).
+  4. YKS Deneme Sınavı Modu ve Canlı Net Takibi (TYT & AYT): Odak paneline Deneme Çözme Modu eklendi (TYT 165 dk, AYT 180 dk, Branş Denemesi). Sınav bittiğinde ders bazlı doğru/yanlış giriş formu açılıp `Net = Doğru - (Yanlış / 4)` formülüyle anında canlı net hesabı yapıldı ve sonuçlar Firestore `tulpiflow_users/fadime/exam_results` koleksiyonuna kaydedildi.
+  5. Özelleştirilebilir Konu Ağacı & Canlı Mentör Alarmı: Kullanıcının kendi eksiklerini ekleyebilmesi için "+ Yeni Alt Konu Ekle" modülü entegre edildi. Fadime bir konuyu tamamladığında veya deneme bitirdiğinde Firestore event tetiklenerek Anıl'ın ekranında sesli ve görsel canlı tebrik/koç uyarısı çıkarıldı.
+  6. Özel ve Elegant Tulpi İkonu: Varsayılan Capacitor robot ikonu silindi. Koyu arka plan üzerine mor/indigo konturlu geometrik Lale (Tulip) simgeleri tüm Android mipmap klasörlerine yerleştirildi.
+  7. Windows Masaüstü EXE Derlemesi: Yerel .NET ve Edge Chromium altyapısını kullanan sıfır bağımlılıklı, yüksek performanslı `TulpiFlow.exe` derlendi ve doğrudan `C:\Users\Anil\Desktop\TulpiFlow.exe` konumuna teslim edildi.
+  8. Senkronizasyon & CI/CD: `npx cap sync android` başarıyla tamamlandı, GitHub deposuna aktarıldı, GitHub Actions APK derlemesi tetiklendi.
 - **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
 ---
+
 

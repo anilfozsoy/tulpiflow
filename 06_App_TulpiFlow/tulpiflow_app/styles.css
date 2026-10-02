@@ -2084,3 +2084,557 @@ body {
   text-align: right;
   font-family: var(--font-mono);
 }
+
+/* ==========================================================================
+   TULPIFLOW v2.0 ENHANCEMENTS: SWIPE, EXAM ENGINE, AMBIENT SOUNDS & MENTOR ALERTS
+   ========================================================================== */
+
+/* 1. Swipe Gestures & Panel Transitions */
+.main-viewport {
+  overflow-x: hidden;
+  position: relative;
+  touch-action: pan-y pinch-zoom;
+}
+
+.tab-pane {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+}
+
+.tab-pane.swipe-left-enter {
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tab-pane.swipe-right-enter {
+  animation: slideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 2. Non-Blocking Elegant Micro-Tooltip Tour */
+.tutorial-tooltip-wrap {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tutorial-tooltip-card {
+  pointer-events: auto;
+  position: absolute;
+  width: 310px;
+  max-width: 90vw;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(99, 102, 241, 0.25);
+  backdrop-filter: blur(16px);
+  animation: tooltipPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tooltipPop {
+  0% { opacity: 0; transform: scale(0.94) translateY(6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tooltip-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  background: var(--primary-subtle);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.tooltip-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s;
+}
+
+.tooltip-close-btn:hover {
+  color: var(--text-high);
+}
+
+.tooltip-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-high);
+  margin-bottom: 6px;
+}
+
+.tooltip-desc {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.tooltip-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tooltip-target-highlight {
+  position: relative;
+  z-index: 1000;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.6), 0 0 20px rgba(99, 102, 241, 0.25) !important;
+  border-radius: var(--radius-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+/* 3. Engine Mode Switcher: Pomodoro vs Exam */
+.engine-mode-switcher {
+  display: flex;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin: 12px 0 16px 0;
+  gap: 4px;
+}
+
+.engine-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.engine-tab-btn:hover {
+  color: var(--text-high);
+}
+
+.engine-tab-btn.active {
+  background: var(--bg-surface-3);
+  color: var(--text-high);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Branch Exam Custom Box */
+.branch-custom-box {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  background: var(--bg-surface-2);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.branch-custom-box label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.branch-custom-box input[type="number"] {
+  width: 70px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-medium);
+  color: var(--text-high);
+  border-radius: var(--radius-sm);
+}
+
+.branch-custom-box input[type="text"] {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-medium);
+  color: var(--text-high);
+  border-radius: var(--radius-sm);
+}
+
+/* 4. Ambient Focus Shield Panel */
+.ambient-sound-panel {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--bg-surface-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.sound-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sound-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-medium);
+}
+
+.sound-toggle-btn {
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sound-toggle-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.sound-toggle-btn.playing {
+  background: var(--emerald-subtle);
+  color: var(--emerald);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.sound-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.sound-chip {
+  background: var(--bg-surface-3);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-medium);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sound-chip:hover {
+  border-color: var(--border-medium);
+  color: var(--text-high);
+}
+
+.sound-chip.active {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .sound-modes-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 5. Exam Results & History List */
+.exam-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.exam-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+
+.exam-result-item:hover {
+  border-color: var(--border-medium);
+}
+
+.exam-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.exam-item-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-high);
+}
+
+.exam-item-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+}
+
+.exam-item-breakdown {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-medium);
+  margin-top: 2px;
+}
+
+.exam-item-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.net-score-pill {
+  background: var(--primary-subtle);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.empty-exam-state {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* 6. Exam Result Entry Modal */
+.exam-modal-card {
+  max-width: 580px;
+  width: 95vw;
+}
+
+.exam-form-row {
+  margin-bottom: 12px;
+}
+
+.exam-type-selector-row {
+  margin-bottom: 14px;
+}
+
+.exam-type-selector-row label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.exam-type-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exam-type-btn.active {
+  background: var(--bg-surface-3);
+  color: var(--text-high);
+}
+
+.exam-courses-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.course-input-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 80px;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg-surface-2);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 500px) {
+  .course-input-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .course-name-col {
+    grid-column: span 2;
+  }
+}
+
+.course-name-col {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-high);
+}
+
+.input-num-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.input-num-wrap label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.input-num-wrap input {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-high);
+}
+
+.course-net-badge {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary);
+  text-align: right;
+}
+
+.exam-net-summary-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.net-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-val {
+  font-size: 1.1rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.primary-net-box .summary-val {
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+/* 7. Live Mentor Alert Banner */
+.mentor-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(16, 185, 129, 0.15));
+  border: 1px solid var(--emerald);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mentor-alert-icon {
+  font-size: 1.6rem;
+}
+
+.mentor-alert-body {
+  flex: 1;
+}
+
+.mentor-alert-body h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-high);
+  margin-bottom: 2px;
+}
+
+.mentor-alert-body p {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+}
+
+/* 8. Subtopic Custom Inline Add */
+.subtopic-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.subtopic-add-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
