@@ -22,6 +22,7 @@
 
   let db = null;
   let isFirestoreConnected = false;
+  const CURRENT_APP_VERSION = "1.0.0";
   const AUTH_KEY = 'tulpiflow_auth_device';
 
   // Initialize Firebase App & Firestore via Compat SDK
@@ -63,7 +64,7 @@
       streakDays: 14,
       todayFocusMinutes: 125,
       lastAction: 'Türev: Geometrik Yorum tamamlandı',
-      statusText: '🟡 Serbest Çalışma',
+      statusText: 'Serbest Çalışma',
       sosActive: false,
       sosMessage: ''
     },
@@ -75,7 +76,7 @@
       streakDays: 28,
       todayFocusMinutes: 255,
       lastAction: 'DDIA LSM-Tree & WAL analiz sprinti tamamlandı',
-      statusText: '🔵 Deep Work Modu'
+      statusText: 'Deep Work Modu'
     }
   };
 
@@ -337,6 +338,97 @@
     }, (error) => {
       console.warn('Sprints snapshot error:', error);
     });
+
+    // 4. In-App Update Engine: Check app_config/version in Firestore
+    checkAppVersion();
+  }
+
+  // =========================================================================
+  // 3.1 IN-APP UPDATE ENGINE (FIRESTORE app_config/version)
+  // =========================================================================
+  function isNewerVersion(latest, current) {
+    if (!latest || !current) return false;
+    const lParts = String(latest).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+    const cParts = String(current).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+    const maxLen = Math.max(lParts.length, cParts.length);
+    for (let i = 0; i < maxLen; i++) {
+      const l = lParts[i] || 0;
+      const c = cParts[i] || 0;
+      if (l > c) return true;
+      if (l < c) return false;
+    }
+    return false;
+  }
+
+  function checkAppVersion() {
+    if (!db) return;
+
+    db.collection('app_config').doc('version').onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        const latestVersion = data.latest_version || data.version || "1.0.0";
+        const changelog = data.changelog || [
+          "İlk stabil sürüm",
+          "Realtime Firestore senkronizasyonu"
+        ];
+        const downloadUrl = data.download_url || "https://github.com/anilfozsoy/tulpiflow/releases/latest";
+
+        if (isNewerVersion(latestVersion, CURRENT_APP_VERSION)) {
+          showUpdateModal(latestVersion, changelog, downloadUrl);
+        }
+      } else {
+        // Initialize Firestore seed document with version: "1.0.0" and default changelog
+        const initialConfig = {
+          version: "1.0.0",
+          latest_version: "1.0.0",
+          changelog: [
+            "İlk stabil sürüm",
+            "Realtime Firestore senkronizasyonu"
+          ],
+          download_url: "https://github.com/anilfozsoy/tulpiflow/releases/latest",
+          releaseDate: new Date().toISOString()
+        };
+        db.collection('app_config').doc('version').set(initialConfig).catch((err) => {
+          console.warn('Initial app_config version seed failed:', err);
+        });
+      }
+    }, (error) => {
+      console.warn('app_config version snapshot error:', error);
+    });
+  }
+
+  function showUpdateModal(latestVersion, changelog, downloadUrl) {
+    const overlay = document.getElementById('update-modal-overlay');
+    const versionLabel = document.getElementById('update-version-label');
+    const list = document.getElementById('update-changelog-list');
+    const downloadBtn = document.getElementById('update-download-btn');
+    const laterBtn = document.getElementById('update-later-btn');
+
+    if (!overlay) return;
+
+    if (versionLabel) {
+      versionLabel.textContent = `v${latestVersion} Hazır`;
+    }
+    if (list && Array.isArray(changelog)) {
+      list.innerHTML = '';
+      changelog.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+    if (downloadBtn) {
+      downloadBtn.href = downloadUrl;
+      downloadBtn.target = "_blank";
+    }
+
+    overlay.classList.remove('hidden');
+
+    if (laterBtn) {
+      laterBtn.onclick = () => {
+        overlay.classList.add('hidden');
+      };
+    }
   }
 
   // Network sync status pill
@@ -690,7 +782,7 @@
     if (statusLabel) statusLabel.textContent = 'Cloud Firestore Canlı Ağına Bağlanılıyor...';
 
     setTimeout(() => {
-      if (statusLabel) statusLabel.textContent = 'Eşzamanlı Hesap Verebilirlik Hazır ⚡';
+      if (statusLabel) statusLabel.textContent = 'Eşzamanlı Çalışma Alanı Senkronize Edildi';
     }, 1200);
 
     const timer = setTimeout(() => {
@@ -1343,7 +1435,7 @@
         </div>
         <div style="display:flex; align-items:center; gap: 8px;">
           <button class="mistake-badge ${m.solved ? 'solved' : 'pending'}" data-mis-id="${m.id}">
-            ${m.solved ? '✓ Çözüldü' : '⏳ İncelenecek'}
+            ${m.solved ? 'Çözüldü' : 'İncelenecek'}
           </button>
           <button class="mini-btn" data-del-mis="${m.id}">✕</button>
         </div>
@@ -1431,12 +1523,12 @@
           syncMistakesToFirestore();
           syncSprintsToFirestore();
           initAllViews();
-          alert('✅ Yedek başarıyla Cloud Firestore\'a yüklendi!');
+          alert('Yedek başarıyla Cloud Firestore\'a yüklendi.');
         } else {
-          alert('❌ Geçersiz TulpiFlow JSON şeması.');
+          alert('Geçersiz TulpiFlow JSON şeması.');
         }
       } catch (err) {
-        alert('❌ JSON dosyası okunamadı.');
+        alert('JSON dosyası okunamadı.');
       }
     };
     reader.readAsText(file);
@@ -1559,7 +1651,7 @@
         syncUserToFirestore('fadime');
         renderSosBanner();
         updateStudentOverview();
-        alert('🚨 S.O.S. sinyali Anıl\'ın ekranına canlı olarak iletildi!');
+        alert('S.O.S. sinyali Anıl\'ın ekranına başarıyla iletildi.');
       }
     });
 
@@ -1577,7 +1669,7 @@
       if (msg) {
         state.users.fadime.lastAction = `Koç Notu: "${msg}"`;
         syncUserToFirestore('fadime');
-        alert(`🌸 Fadime'nin ekranına anında iletildi: "${msg}"`);
+        alert(`Koç Notu Fadime'nin ekranına başarıyla iletildi: "${msg}"`);
         input.value = '';
       }
     });
@@ -1612,7 +1704,7 @@
       }
 
       document.getElementById('delegate-title-input').value = '';
-      alert(`✅ Görev Cloud Firestore'a kaydedildi ve Fadime'ye anında iletildi!`);
+      alert('Görev Cloud Firestore\'a kaydedildi ve Fadime\'ye iletildi.');
     });
 
     // Add Sprint for Anıl
