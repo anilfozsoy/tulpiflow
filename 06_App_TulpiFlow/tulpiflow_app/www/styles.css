@@ -280,6 +280,17 @@ body {
   pointer-events: none;
 }
 
+/* In-App OTA Update Modal Top Elevation */
+#update-modal-overlay {
+  z-index: 999999 !important;
+}
+#update-modal-overlay.update-active {
+  display: flex !important;
+  z-index: 999999 !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 .auth-card, .update-card, .task-modal-card {
   background: var(--bg-surface-1);
   border: 1px solid var(--border-medium);

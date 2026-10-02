@@ -14,8 +14,8 @@
   // =========================================================================
   // 1. CONFIGURATION, VERSIONS & AUTH CONSTANTS
   // =========================================================================
-  const CURRENT_APP_VERSION = "2.0.0";
-  const CURRENT_VERSION = "2.0.0";
+  const CURRENT_APP_VERSION = "1.3.0";
+  const CURRENT_VERSION = "1.3.0";
   const AUTH_KEY = 'tulpiflow_auth_device';
   const AUTH_TOKEN_KEY = 'tulpiflow_auth_token';
   const THEME_KEY = 'tulpiflow_theme';
@@ -586,12 +586,13 @@
   }
 
   // =========================================================================
-  // 6. IN-APP UPDATE ENGINE
+  // 6. IN-APP UPDATE ENGINE (DECOUPLED OTA CHECKER)
   // =========================================================================
   function isNewerVersion(latest, current) {
     if (!latest || !current) return false;
-    const lParts = String(latest).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
-    const cParts = String(current).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+    const clean = (v) => String(v).trim().replace(/^v/i, '').split(/[-+]/)[0];
+    const lParts = clean(latest).split('.').map(n => parseInt(n, 10) || 0);
+    const cParts = clean(current).split('.').map(n => parseInt(n, 10) || 0);
     const maxLen = Math.max(lParts.length, cParts.length);
     for (let i = 0; i < maxLen; i++) {
       const l = lParts[i] || 0;
@@ -602,32 +603,36 @@
     return false;
   }
 
-  function checkAppVersion() {
-    if (!db) return;
-    db.collection('app_config').doc('version').onSnapshot((doc) => {
-      if (doc.exists) {
-        const data = doc.data();
-        const latestVer = data.latest_version || CURRENT_APP_VERSION;
-        if (isNewerVersion(latestVer, CURRENT_APP_VERSION)) {
-          showUpdateModal(data);
-        }
-      } else {
-        db.collection('app_config').doc('version').set({
-          latest_version: CURRENT_APP_VERSION,
-          release_notes: [
-            "v2.0 Dokunmatik kaydırma (Swipe) panel geçişi",
-            "Spotify / YouTube Music tarzı bildirim çekmecesi medya denetimi",
-            "4 Odak Ambiyansı: Yağmur, Kamp Ateşi, Okyanus ve Pembe Gürültü",
-            "YKS TYT & AYT Deneme Sınavı Motoru ve Canlı Net Hesabı",
-            "Özelleştirilebilir Konu Ağacı & Canlı Mentör Alarmları",
-            "Özel geometrik Tulip Android ve Desktop simgeleri",
-            "Windows Desktop EXE sürümü teslimatı"
-          ],
-          apk_url: "https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk"
-        });
+  function checkAppUpdate() {
+    function startListening() {
+      if (!db && typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
+        db = firebase.firestore();
       }
-    }, (err) => console.warn('Version check error:', err));
+      if (!db) {
+        setTimeout(startListening, 400);
+        return;
+      }
+      try {
+        db.collection('app_config').doc('version').onSnapshot((doc) => {
+          if (!doc.exists) return;
+          const data = doc.data();
+          const latestVer = data.latest_version || data.version || CURRENT_APP_VERSION;
+          if (isNewerVersion(latestVer, CURRENT_APP_VERSION)) {
+            showUpdateModal(data);
+          }
+        }, (err) => {
+          console.warn('Update check snapshot warning:', err);
+        });
+      } catch (err) {
+        console.warn('checkAppUpdate error:', err);
+      }
+    }
+
+    startListening();
   }
+
+  // Backward-compatible alias
+  const checkAppVersion = checkAppUpdate;
 
   function showUpdateModal(config) {
     const modal = document.getElementById('update-modal-overlay');
@@ -637,20 +642,42 @@
     const laterBtn = document.getElementById('update-later-btn');
 
     if (!modal) return;
-    if (verTag) verTag.textContent = `${config.latest_version || 'v2.0.0'} Hazır`;
-    if (changelogList && config.release_notes) {
-      changelogList.innerHTML = config.release_notes.map(item => `<li>${item}</li>`).join('');
+
+    const latestVer = config.latest_version || config.version || '1.3.0';
+    if (verTag) verTag.textContent = `v${String(latestVer).replace(/^v/i, '')} Hazır`;
+
+    const logs = config.changelog || config.release_notes || [
+      "Seslerin kesilme sorunu giderildi (sonsuz döngü aktif).",
+      "Deneme modu ve akordeon paneller eklendi."
+    ];
+
+    if (changelogList) {
+      changelogList.innerHTML = logs.map(item => `<li>${item}</li>`).join('');
     }
 
+    // Explicitly force modal directly to the absolute top of the screen
+    modal.style.cssText = 'display: flex !important; z-index: 999999 !important; opacity: 1 !important; pointer-events: auto !important;';
     modal.classList.remove('hidden');
+    modal.classList.add('update-active');
+
+    const downloadUrl = config.apk_download_url || config.apk_url || config.download_url || 'https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk';
 
     if (downloadBtn) {
       downloadBtn.onclick = () => {
-        window.open(config.apk_url || 'https://github.com/anilfozsoy/tulpiflow/releases', '_blank');
+        window.open(downloadUrl, '_system');
+        try {
+          window.open(downloadUrl, '_blank');
+        } catch (e) {
+          window.location.href = downloadUrl;
+        }
       };
     }
     if (laterBtn) {
-      laterBtn.onclick = () => modal.classList.add('hidden');
+      laterBtn.onclick = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('update-active');
+        modal.style.cssText = 'display: none !important; pointer-events: none !important;';
+      };
     }
   }
 
@@ -666,24 +693,30 @@
   let ambientLfoGain = null;
   let isAmbientPlaying = false;
   let activeSoundMode = 'rain'; // 'rain' | 'campfire' | 'ocean' | 'noise'
-  let backgroundSilentAudio = null;
+  let ambientStopTimer = null;
+
+  // Global Singleton Audio Player for Continuous Background Audio Loop
+  if (!window.TulpiAudioPlayer) {
+    window.TulpiAudioPlayer = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+  }
+  window.TulpiAudioPlayer.loop = true;
 
   function getAudioContext() {
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       audioCtx = new AudioContextClass();
+
+      // Ensure audio context resumes immediately if auto-suspended
+      audioCtx.onstatechange = () => {
+        if (isAmbientPlaying && audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+      };
     }
     if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
+      audioCtx.resume().catch(() => {});
     }
     return audioCtx;
-  }
-
-  function initSilentAudioTrick() {
-    if (!backgroundSilentAudio) {
-      backgroundSilentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-      backgroundSilentAudio.loop = true;
-    }
   }
 
   function setupMediaSession() {
@@ -725,8 +758,10 @@
   }
 
   function generatePinkNoiseBuffer(ctx, durationSec) {
-    const bufferSize = ctx.sampleRate * durationSec;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const dur = durationSec || 4;
+    const sampleRate = ctx.sampleRate || 44100;
+    const bufferSize = sampleRate * dur;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, sampleRate);
     const output = noiseBuffer.getChannelData(0);
     let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
     for (let i = 0; i < bufferSize; i++) {
@@ -743,64 +778,118 @@
     return noiseBuffer;
   }
 
-  function startAmbientSynthesizer() {
-    stopAmbientSynthesizer();
+  function cleanupAudioNodes() {
+    if (ambientNoiseSource) {
+      try {
+        ambientNoiseSource.onended = null;
+        ambientNoiseSource.stop();
+        ambientNoiseSource.disconnect();
+      } catch (e) {}
+      ambientNoiseSource = null;
+    }
+    if (ambientLfoNode) {
+      try {
+        ambientLfoNode.stop();
+        ambientLfoNode.disconnect();
+      } catch (e) {}
+      ambientLfoNode = null;
+    }
+    if (ambientLfoGain) {
+      try { ambientLfoGain.disconnect(); } catch (e) {}
+      ambientLfoGain = null;
+    }
+    if (ambientFilterNode) {
+      try { ambientFilterNode.disconnect(); } catch (e) {}
+      ambientFilterNode = null;
+    }
+    if (ambientGainNode) {
+      try { ambientGainNode.disconnect(); } catch (e) {}
+      ambientGainNode = null;
+    }
+  }
+
+  function startAmbientSynthesizer(seamless = false) {
+    if (ambientStopTimer) {
+      clearTimeout(ambientStopTimer);
+      ambientStopTimer = null;
+    }
+    cleanupAudioNodes();
+
     try {
       const ctx = getAudioContext();
-      initSilentAudioTrick();
-      backgroundSilentAudio.play().catch(() => {});
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
-      const noiseBuffer = generatePinkNoiseBuffer(ctx, 3);
+      // 1. Maintain background audio session via global singleton loop
+      if (!window.TulpiAudioPlayer) {
+        window.TulpiAudioPlayer = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+      }
+      window.TulpiAudioPlayer.loop = true;
+      window.TulpiAudioPlayer.play().catch(e => {
+        console.warn('TulpiAudioPlayer background loop notice:', e);
+      });
+
+      // 2. Synthesize infinite looped soundscape
+      const noiseBuffer = generatePinkNoiseBuffer(ctx, 4);
       ambientNoiseSource = ctx.createBufferSource();
       ambientNoiseSource.buffer = noiseBuffer;
-      ambientNoiseSource.loop = true;
+      ambientNoiseSource.loop = true; // Crucial infinite buffer looping
+
+      // Safety fallback: if audio buffer somehow ends, continuously restart
+      ambientNoiseSource.onended = () => {
+        if (isAmbientPlaying) {
+          startAmbientSynthesizer(true);
+        }
+      };
 
       ambientFilterNode = ctx.createBiquadFilter();
       ambientGainNode = ctx.createGain();
 
+      const t = ctx.currentTime;
       if (activeSoundMode === 'rain') {
         // Gece Yağmuru: Lowpass filtered at 750Hz with soft resonance
         ambientFilterNode.type = 'lowpass';
-        ambientFilterNode.frequency.setValueAtTime(750, ctx.currentTime);
-        ambientGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        ambientGainNode.gain.linearRampToValueAtTime(0.09, ctx.currentTime + 1);
+        ambientFilterNode.frequency.setValueAtTime(750, t);
+        ambientGainNode.gain.setValueAtTime(seamless ? 0.09 : 0.001, t);
+        ambientGainNode.gain.linearRampToValueAtTime(0.09, t + 0.3);
 
         ambientNoiseSource.connect(ambientFilterNode);
         ambientFilterNode.connect(ambientGainNode);
       } else if (activeSoundMode === 'campfire') {
         // Kamp Ateşi: Low warm rumble + crackle pops
         ambientFilterNode.type = 'lowpass';
-        ambientFilterNode.frequency.setValueAtTime(160, ctx.currentTime);
-        ambientGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        ambientGainNode.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 1);
+        ambientFilterNode.frequency.setValueAtTime(160, t);
+        ambientGainNode.gain.setValueAtTime(seamless ? 0.08 : 0.001, t);
+        ambientGainNode.gain.linearRampToValueAtTime(0.08, t + 0.3);
 
         ambientNoiseSource.connect(ambientFilterNode);
         ambientFilterNode.connect(ambientGainNode);
       } else if (activeSoundMode === 'ocean') {
         // Okyanus Dalgası: Bandpass with LFO swell (0.08Hz)
         ambientFilterNode.type = 'bandpass';
-        ambientFilterNode.frequency.setValueAtTime(450, ctx.currentTime);
-        ambientFilterNode.Q.setValueAtTime(1.5, ctx.currentTime);
+        ambientFilterNode.frequency.setValueAtTime(450, t);
+        ambientFilterNode.Q.setValueAtTime(1.5, t);
 
         ambientLfoNode = ctx.createOscillator();
-        ambientLfoNode.frequency.setValueAtTime(0.08, ctx.currentTime);
+        ambientLfoNode.frequency.setValueAtTime(0.08, t);
         ambientLfoGain = ctx.createGain();
-        ambientLfoGain.gain.setValueAtTime(320, ctx.currentTime);
+        ambientLfoGain.gain.setValueAtTime(320, t);
         ambientLfoNode.connect(ambientLfoGain);
         ambientLfoGain.connect(ambientFilterNode.frequency);
         ambientLfoNode.start();
 
-        ambientGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        ambientGainNode.gain.linearRampToValueAtTime(0.10, ctx.currentTime + 1);
+        ambientGainNode.gain.setValueAtTime(seamless ? 0.10 : 0.001, t);
+        ambientGainNode.gain.linearRampToValueAtTime(0.10, t + 0.3);
 
         ambientNoiseSource.connect(ambientFilterNode);
         ambientFilterNode.connect(ambientGainNode);
       } else {
         // Focus Noise / Pembe Gürültü: Pure distraction masking
         ambientFilterNode.type = 'lowpass';
-        ambientFilterNode.frequency.setValueAtTime(1200, ctx.currentTime);
-        ambientGainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        ambientGainNode.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 1);
+        ambientFilterNode.frequency.setValueAtTime(1200, t);
+        ambientGainNode.gain.setValueAtTime(seamless ? 0.07 : 0.001, t);
+        ambientGainNode.gain.linearRampToValueAtTime(0.07, t + 0.3);
 
         ambientNoiseSource.connect(ambientFilterNode);
         ambientFilterNode.connect(ambientGainNode);
@@ -818,24 +907,34 @@
   }
 
   function stopAmbientSynthesizer() {
-    if (ambientGainNode && audioCtx) {
-      ambientGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
-      setTimeout(() => {
-        if (ambientNoiseSource) {
-          try { ambientNoiseSource.stop(); } catch (e) {}
-          ambientNoiseSource = null;
+    isAmbientPlaying = false;
+    if (ambientStopTimer) {
+      clearTimeout(ambientStopTimer);
+      ambientStopTimer = null;
+    }
+
+    if (ambientGainNode && audioCtx && audioCtx.state === 'running') {
+      try {
+        ambientGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+        ambientGainNode.gain.setValueAtTime(ambientGainNode.gain.value, audioCtx.currentTime);
+        ambientGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+      } catch (e) {}
+
+      ambientStopTimer = setTimeout(() => {
+        cleanupAudioNodes();
+        if (window.TulpiAudioPlayer) {
+          try { window.TulpiAudioPlayer.pause(); } catch (e) {}
         }
-        if (ambientLfoNode) {
-          try { ambientLfoNode.stop(); } catch (e) {}
-          ambientLfoNode = null;
-        }
-        isAmbientPlaying = false;
-        if (backgroundSilentAudio) backgroundSilentAudio.pause();
         updateSoundUIState(false);
-      }, 300);
+        setupMediaSession();
+      }, 220);
     } else {
-      isAmbientPlaying = false;
+      cleanupAudioNodes();
+      if (window.TulpiAudioPlayer) {
+        try { window.TulpiAudioPlayer.pause(); } catch (e) {}
+      }
       updateSoundUIState(false);
+      setupMediaSession();
     }
   }
 
@@ -853,9 +952,8 @@
     document.querySelectorAll('.sound-chip').forEach(chip => {
       chip.classList.toggle('active', chip.getAttribute('data-sound') === mode);
     });
-    if (isAmbientPlaying) {
-      startAmbientSynthesizer(); // hot-switch mode seamlessly
-    }
+    // Auto-start and switch sound seamlessly on chip click
+    startAmbientSynthesizer(true);
   }
 
   function updateSoundUIState(playing) {
@@ -2165,6 +2263,9 @@
       if (el) el.addEventListener(event, handler);
     }
 
+    // 0. Decoupled OTA In-App Update Engine (Directly on startup, independent of auth/passcode)
+    checkAppUpdate();
+
     // 1. Initialize Theme & Swipe Navigation
     initTheme();
     initSwipeNavigation();
@@ -2256,7 +2357,10 @@
 
     // Timer actions
     safeOn('timer-start-pause-btn', 'click', startPauseTimer);
-    safeOn('timer-reset-btn', 'click', resetTimer);
+    safeOn('timer-reset-btn', 'click', () => {
+      resetTimer();
+      stopAmbientSynthesizer();
+    });
     safeOn('finish-exam-now-btn', 'click', () => {
       const eName = state.pomodoro.examType === 'tyt' ? 'TYT Denemesi' : (state.pomodoro.examType === 'ayt' ? 'AYT Denemesi' : (state.pomodoro.branchName || 'Branş Denemesi'));
       openExamNetModal(state.pomodoro.examType, eName);
