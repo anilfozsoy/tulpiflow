@@ -101,3 +101,25 @@
 - **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
 ---
 
+## [TIMESTAMP: 2026-10-02 03:48:50 UTC+3]
+- **Execution Model:** Gemini 3.8 Flash (High)
+- **Prompt Hash / Context ID:** MASTER-REFACTOR-YKS-YOUTUBE-TUTORIAL-05
+- **Target Files Affected:**
+  - `06_App_TulpiFlow/tulpiflow_app/curriculum.js` (Created: Comprehensive YKS TYT/AYT curriculum with YouTube teacher integrations)
+  - `06_App_TulpiFlow/tulpiflow_app/index.html` (Overhauled: Asymmetric spaces, minimal header, circular Pomodoro, spotlight tutorial)
+  - `06_App_TulpiFlow/tulpiflow_app/styles.css` (Overhauled: Slate/Zinc dark & light themes, iOS segmented control, responsive mobile shell)
+  - `06_App_TulpiFlow/tulpiflow_app/app.js` (Overhauled: v1.1.0 update engine, background Focus Shield Media Session API, coach tasks, tutorial engine)
+  - `06_App_TulpiFlow/tulpiflow_app/www/*` (Updated: Synchronized web assets)
+  - `06_App_TulpiFlow/tulpiflow_app/android/*` (Updated via `npx cap sync android`)
+  - `06_App_TulpiFlow/audit_log.md` (Appended)
+- **Action Summary:**
+  1. Asimetrik Yaşam Döngüsü ve Kimlik Ayrıştırması: Tek seferlik kalıcı şifre (`7799` -> Anıl, `2026` -> Fadime) entegre edildi. Fadime için salt YKS odaklı çalışma alanı, Anıl için derin çalışma & mentörlük izleme paneli ayrıştırıldı.
+  2. Arayüz ve Tema: Geometrik ince Lale (Tulip) SVG ikonu, de-emphasized header, sağ üst avatar taşma hatası düzeltmesi, Dark ve Light mod değişkenleri ve circular Pomodoro SVG halkası uygulandı.
+  3. Güncel YKS Müfredatı & YouTube Derin Bağlantı Motoru: TYT/AYT Matematik, Geometri, Fizik, Kimya, Biyoloji ve Türkçe için Eyüp B., Mert Hoca, Kenan Kara, VIP Fizik, Görkem Şahin, Dr. Biyoloji ve Rüştü Hoca video arama intentleri kuruldu.
+  4. Arka Plan Ses Motoru & Medya Bildirimi: Focus Shield pembe gürültü ve yağmur sesi Media Session API (`navigator.mediaSession`) ile bildirim çubuğuna bağlandı; ekran kapalıyken de kesintisiz çalma sağlandı.
+  5. İnteraktif Adım Adım Rehber: İlk açılışta veya profil menüsünden açılabilen 5 adımlı Spotlight tutorial modülü sisteme dahil edildi.
+  6. In-App Update Engine: `CURRENT_VERSION = "1.1.0"` olarak yükseltildi, Firestore `app_config/version` dokümanı güncellendi.
+- **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
+---
+
+
