@@ -122,4 +122,31 @@
 - **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
 ---
 
-
+## [TIMESTAMP: 2026-10-02 04:28:35 UTC+3]
+- **Execution Model:** Gemini 3.8 Flash (High) / Antigravity Autonomous Engine
+- **Prompt Hash / Context ID:** FULL-YKS-CURRICULUM-YOUTUBE-OTA-UPDATE-V120
+- **Target Files Affected:**
+  - `06_App_TulpiFlow/tulpiflow_app/curriculum.js` (Overhauled: 46 topics, 180 subtopics covering entire 2026-2027 MEB/ÖSYM YKS TYT & AYT Sayısal curriculum with YouTube intents `vnd.youtube://results?q=...` & web URLs)
+  - `06_App_TulpiFlow/tulpiflow_app/www/curriculum.js` (Mirrored)
+  - `06_App_TulpiFlow/tulpiflow_app/app.js` & `www/app.js` (Updated: `CURRENT_VERSION = "1.2.0"`, intent-aware `openYouTube`, resilient curriculum merging, category filters)
+  - `06_App_TulpiFlow/tulpiflow_app/index.html` & `www/index.html` (Updated: 8 granular category pills, updated descriptions, v1.2.0 labels)
+  - `06_App_TulpiFlow/tulpiflow_app/styles.css` & `www/styles.css` (Updated: `.subtopic-row`, `.subtopic-yt-btn` micro-interactions)
+  - `06_App_TulpiFlow/tulpiflow_app/android/*` (Synchronized via `npx cap sync android`)
+  - Cloud Firestore `app_config/version` (Updated: `1.2.0` release document with APK download URL & changelog)
+  - Cloud Firestore `app_data/curriculum` (Synchronized: All 46 topics with full deep-linking)
+  - Artifact Target: `C:\Users\Anil\Desktop\TulpiFlow.apk` (Compiled via GitHub Actions Run `36950878779`, size: 4,185,265 bytes)
+- **Action Summary:**
+  1. Eksiksiz 2026-2027 MEB/ÖSYM YKS (TYT + AYT Sayısal) Kazanım Ağacı oluşturuldu:
+     - A. TYT Türkçe (40 Soru) - Rüştü Hoca ile Türkçe, Kadir Gümüş
+     - B. TYT Sosyal Bilimler (20 Soru) - Tarih (Mehmet Celal Özyıldız), Coğrafya (Coğrafyanın Kodları, Bayram Meral), Felsefe (Felsefe Atölyesi), Din Kültürü
+     - C. TYT Temel Matematik & Geometri (40 Soru) - Eyüp B., Mert Hoca, Rehber Matematik, Kenan Kara
+     - D. TYT Fen Bilimleri (20 Soru) - Fizik (VIP Fizik), Kimya (Görkem Şahin), Biyoloji (Dr. Biyoloji)
+     - E. AYT İleri Matematik & Geometri (40 Soru) - Eyüp B., Mert Hoca, Kenan Kara
+     - F. AYT İleri Fizik (14 Soru) - VIP Fizik, Altuğ Güneş, Özcan Aykın
+     - G. AYT İleri Kimya (13 Soru) - Görkem Şahin (Benim Hocam), Kimya Adası
+     - H. AYT İleri Biyoloji (13 Soru) - Dr. Biyoloji, Selin Hoca, Biosem
+  2. Her alt konuya ve ana ders kartlarına YouTube native intenti (`vnd.youtube://results?q=...`) ve web alternatifi (`https://www.youtube.com/results?search_query=...`) bağlandı.
+  3. Sürüm v1.2.0'a yükseltildi, Firestore `app_config/version` canlı olarak güncellendi ve mevcut v1.1.0/v1.0.0 istemcilerine OTA güncelleme bildirimi tetiklendi.
+  4. Capacitor Android projesi yerel olarak senkronize edildi, GitHub Actions üzerinde CI/CD derlemesi tamamlandı ve derlenen APK doğrudan masaüstüne teslim edildi.
+- **State Transition:** Status: READY -> IN_PROGRESS -> COMPLETED
+---
