@@ -1,10 +1,11 @@
 // TulpiFlow Service Worker (Offline-First Cache)
-const CACHE_NAME = 'tulpiflow-cache-v1';
+const CACHE_NAME = 'tulpiflow-cache-v1.3.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './curriculum.js',
   './manifest.json'
 ];
 

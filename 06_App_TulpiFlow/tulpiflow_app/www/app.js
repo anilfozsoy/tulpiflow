@@ -11,8 +11,8 @@
   // =========================================================================
   // 1. CONFIGURATION, VERSIONS & AUTH CONSTANTS
   // =========================================================================
-  const CURRENT_APP_VERSION = "1.2.0";
-  const CURRENT_VERSION = "1.2.0";
+  const CURRENT_APP_VERSION = "1.3.0";
+  const CURRENT_VERSION = "1.3.0";
   const AUTH_KEY = 'tulpiflow_auth_device';
   const AUTH_TOKEN_KEY = 'tulpiflow_auth_token';
   const THEME_KEY = 'tulpiflow_theme';
@@ -206,8 +206,36 @@
   // 4. AUTHENTICATION & ASYMMETRIC LIFECYCLE
   // =========================================================================
   function checkDeviceAuth() {
-    const savedAuth = localStorage.getItem(AUTH_KEY);
-    const savedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+    let savedAuth = localStorage.getItem(AUTH_KEY);
+    let savedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    // Multi-layer fallback: check cookie if localStorage was cleared
+    
+    // Capacitor Preferences native support
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) {
+      window.Capacitor.Plugins.Preferences.get({ key: AUTH_KEY }).then(res => {
+        if (res && res.value && !savedAuth) {
+          try {
+            savedAuth = res.value;
+            savedToken = 'cap-persisted-token';
+            localStorage.setItem(AUTH_KEY, savedAuth);
+            localStorage.setItem(AUTH_TOKEN_KEY, savedToken);
+          } catch(e) {}
+        }
+      }).catch(() => {});
+    }
+
+    if (!savedAuth && document.cookie) {
+      const match = document.cookie.match(new RegExp('(^| )' + AUTH_KEY + '=([^;]+)'));
+      if (match) {
+        try {
+          savedAuth = decodeURIComponent(match[2]);
+          savedToken = 'cookie-persisted-token';
+          localStorage.setItem(AUTH_KEY, savedAuth);
+          localStorage.setItem(AUTH_TOKEN_KEY, savedToken);
+        } catch(e) {}
+      }
+    }
 
     if (savedAuth && savedToken) {
       try {
@@ -253,14 +281,22 @@
     } else {
       if (errorEl) {
         errorEl.classList.remove('hidden');
-        errorEl.textContent = 'Geçersiz şifre! (7799 veya 2026)';
+        errorEl.textContent = 'Geçersiz şifre. Lütfen tekrar deneyin.';
       }
       return;
     }
 
-    // Persist securely to device
+    // Persist securely to device (localStorage + Cookie for persistent survival)
     localStorage.setItem(AUTH_KEY, JSON.stringify(currentAuth));
     localStorage.setItem(AUTH_TOKEN_KEY, currentAuth.token);
+
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) {
+      window.Capacitor.Plugins.Preferences.set({ key: AUTH_KEY, value: JSON.stringify(currentAuth) }).catch(() => {});
+    }
+
+    try {
+      document.cookie = `${AUTH_KEY}=${encodeURIComponent(JSON.stringify(currentAuth))}; max-age=315360000; path=/`;
+    } catch(e) {}
 
     const authOverlay = document.getElementById('auth-modal-overlay');
     if (authOverlay) authOverlay.classList.add('hidden');
@@ -326,9 +362,17 @@
 
       if (bottomBar) {
         bottomBar.innerHTML = `
-          <button class="m-nav-btn active" data-tab="fadime">
+          <button class="m-nav-btn active" data-tab="fadime" data-subtab="focus">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span class="m-label">YKS Odak</span>
+            <span class="m-label">Odak</span>
+          </button>
+          <button class="m-nav-btn" data-tab="fadime" data-subtab="curriculum">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span class="m-label">Müfredat</span>
+          </button>
+          <button class="m-nav-btn" data-tab="fadime" data-subtab="tasks-notes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span class="m-label">Koç & Not</span>
           </button>
           <button class="m-nav-btn" data-tab="calendar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -389,12 +433,29 @@
     document.querySelectorAll('.nav-tab, .m-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-tab');
-        if (tab) switchTab(tab);
+        const sub = btn.getAttribute('data-subtab');
+        if (tab) switchTab(tab, sub);
       });
     });
   }
 
-  function switchTab(tabId) {
+  let activeSubtab = 'focus';
+
+  function switchSubtab(subtabId) {
+    activeSubtab = subtabId;
+    document.querySelectorAll('.ws-seg-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtabId);
+    });
+    document.querySelectorAll('#pane-fadime .subpane').forEach(pane => {
+      pane.classList.toggle('hidden', pane.id !== `subpane-${subtabId}`);
+      pane.classList.toggle('active', pane.id === `subpane-${subtabId}`);
+    });
+    document.querySelectorAll('.m-nav-btn[data-subtab]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtabId);
+    });
+  }
+
+  function switchTab(tabId, subtabId) {
     activeTab = tabId;
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab, .m-nav-btn').forEach(b => b.classList.remove('active'));
@@ -402,7 +463,17 @@
     const targetPane = document.getElementById('pane-' + tabId);
     if (targetPane) targetPane.classList.add('active');
 
-    document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(b => b.classList.add('active'));
+    if (tabId === 'fadime' && subtabId) {
+      switchSubtab(subtabId);
+    }
+
+    document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(b => {
+      if (subtabId && b.hasAttribute('data-subtab')) {
+        if (b.getAttribute('data-subtab') === subtabId) b.classList.add('active');
+      } else if (!subtabId) {
+        b.classList.add('active');
+      }
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -611,16 +682,94 @@
     });
   }
 
+function downloadAndInstallApk(downloadUrl) {
+    const progressWrap = document.getElementById('update-download-progress-wrap');
+    const progressStatus = document.getElementById('update-progress-status');
+    const progressPercent = document.getElementById('update-progress-percent');
+    const progressFill = document.getElementById('update-progress-fill');
+    const progressSubtext = document.getElementById('update-progress-subtext');
+    const actionsWrap = document.getElementById('update-actions-wrap');
+
+    if (progressWrap) progressWrap.classList.remove('hidden');
+    if (actionsWrap) actionsWrap.classList.add('hidden');
+
+    const targetUrl = downloadUrl || "https://github.com/anilfozsoy/tulpiflow/releases/latest/download/TulpiFlow.apk";
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', targetUrl, true);
+    xhr.responseType = 'blob';
+
+    xhr.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0) {
+        const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
+        if (progressPercent) progressPercent.textContent = `%${pct}`;
+        if (progressFill) progressFill.style.width = `${pct}%`;
+        const mbLoaded = (e.loaded / (1024 * 1024)).toFixed(1);
+        const mbTotal = (e.total / (1024 * 1024)).toFixed(1);
+        if (progressSubtext) progressSubtext.textContent = `${mbLoaded} MB / ${mbTotal} MB indirildi`;
+      } else {
+        const mbLoaded = (e.loaded / (1024 * 1024)).toFixed(1);
+        if (progressPercent) progressPercent.textContent = `İndiriliyor...`;
+        if (progressFill) progressFill.style.width = `80%`;
+        if (progressSubtext) progressSubtext.textContent = `${mbLoaded} MB aktarıldı`;
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200 || xhr.status === 206) {
+        if (progressStatus) progressStatus.textContent = "İndirme Tamamlandı! Paket Yükleyici Başlatılıyor...";
+        if (progressPercent) progressPercent.textContent = "%100";
+        if (progressFill) progressFill.style.width = "100%";
+        if (progressSubtext) progressSubtext.textContent = "Android Paket Yükleyici açılıyor...";
+
+        const blob = xhr.response;
+        try {
+          const blobUrl = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.android.package-archive' }));
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = 'TulpiFlow.apk';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(blobUrl);
+          }, 1500);
+        } catch (blobErr) {
+          console.warn('Blob installer fallback:', blobErr);
+          window.location.href = targetUrl;
+        }
+      } else {
+        if (progressStatus) progressStatus.textContent = "Doğrudan İndirme Başlatılıyor...";
+        if (progressSubtext) progressSubtext.textContent = "Tarayıcı ile indiriliyor...";
+        window.location.href = targetUrl;
+      }
+    };
+
+    xhr.onerror = () => {
+      if (progressStatus) progressStatus.textContent = "Doğrudan İndirme Başlatılıyor...";
+      if (progressSubtext) progressSubtext.textContent = "Alternatif indirme rotasına yönlendiriliyor...";
+      window.location.href = targetUrl;
+    };
+
+    xhr.send();
+  }
+
   function showUpdateModal(latestVersion, changelog, downloadUrl) {
     const overlay = document.getElementById('update-modal-overlay');
     const versionLabel = document.getElementById('update-version-label');
     const list = document.getElementById('update-changelog-list');
     const downloadBtn = document.getElementById('update-download-btn');
     const laterBtn = document.getElementById('update-later-btn');
+    const progressWrap = document.getElementById('update-download-progress-wrap');
+    const actionsWrap = document.getElementById('update-actions-wrap');
 
     if (!overlay) return;
 
     if (versionLabel) versionLabel.textContent = `v${latestVersion} Hazır`;
+    if (progressWrap) progressWrap.classList.add('hidden');
+    if (actionsWrap) actionsWrap.classList.remove('hidden');
+
     if (list && Array.isArray(changelog)) {
       list.innerHTML = '';
       changelog.forEach((item) => {
@@ -629,18 +778,21 @@
         list.appendChild(li);
       });
     }
-    if (downloadBtn) {
-      downloadBtn.href = downloadUrl;
-      downloadBtn.target = "_blank";
-    }
 
-    overlay.classList.remove('hidden');
+    if (downloadBtn) {
+      downloadBtn.onclick = (e) => {
+        e.preventDefault();
+        downloadAndInstallApk(downloadUrl);
+      };
+    }
 
     if (laterBtn) {
       laterBtn.onclick = () => {
         overlay.classList.add('hidden');
       };
     }
+
+    overlay.classList.remove('hidden');
   }
 
   // =========================================================================
@@ -865,6 +1017,22 @@
   // =========================================================================
   // 9. YKS MÜFREDATI & YOUTUBE DEEP-LINKING MOTORU
   // =========================================================================
+  // =========================================================================
+  // 9. YKS MÜFREDATI & YOUTUBE DEEP-LINKING AKORDEON MOTORU
+  // =========================================================================
+  const SUBJECTS_METADATA = [
+    { id: 'tyt-turkce', name: 'TYT Türkçe', icon: '📖', desc: '40 Soru • Rüştü Hoca & Kadir Gümüş' },
+    { id: 'tyt-sosyal', name: 'TYT Sosyal Bilimler', icon: '🌍', desc: '20 Soru • Tarih, Coğrafya, Felsefe, Din' },
+    { id: 'tyt-matematik', name: 'TYT Temel Matematik & Geo', icon: '📐', desc: '40 Soru • Eyüp B., Mert Hoca, Kenan Kara' },
+    { id: 'tyt-fen', name: 'TYT Fen Bilimleri', icon: '⚛️', desc: '20 Soru • VIP Fizik, Görkem Şahin, Dr. Biyoloji' },
+    { id: 'ayt-matematik', name: 'AYT İleri Matematik & Geo', icon: '📈', desc: '40 Soru • Eyüp B., Mert Hoca, Kenan Kara' },
+    { id: 'ayt-fizik', name: 'AYT İleri Fizik', icon: '⚡', desc: '14 Soru • VIP Fizik, Altuğ Güneş, Özcan Aykın' },
+    { id: 'ayt-kimya', name: 'AYT İleri Kimya', icon: '🧪', desc: '13 Soru • Görkem Şahin, Kimya Adası' },
+    { id: 'ayt-biyoloji', name: 'AYT İleri Biyoloji', icon: '🧬', desc: '13 Soru • Dr. Biyoloji, Selin Hoca, Biosem' }
+  ];
+
+  let expandedAccordionCategories = new Set(['ayt-matematik', 'tyt-matematik']);
+
   function openYouTube(query, explicitIntent, explicitWeb) {
     if (!query && !explicitIntent && !explicitWeb) return;
     const cleanQuery = encodeURIComponent(query || '');
@@ -892,11 +1060,6 @@
     if (!container) return;
     container.innerHTML = '';
 
-    const list = state.topicTree.filter(t => {
-      if (activeTopicCategory === 'all') return true;
-      return t.category === activeTopicCategory;
-    });
-
     let totalSubtopics = 0;
     let completedSubtopics = 0;
 
@@ -913,61 +1076,121 @@
     if (percentLabel) percentLabel.textContent = `%${percent}`;
     if (fillBar) fillBar.style.width = `${percent}%`;
 
-    list.forEach(topic => {
-      const card = document.createElement('div');
-      card.className = 'topic-card';
-
-      const defaultTeacher = topic.teachers && topic.teachers[0] ? topic.teachers[0] : null;
-      const defaultQuery = defaultTeacher ? defaultTeacher.query : `${topic.title} YKS`;
-      const defaultIntent = defaultTeacher && defaultTeacher.intentUrl ? defaultTeacher.intentUrl : `vnd.youtube://results?q=${encodeURIComponent(defaultQuery)}`;
-      const defaultWeb = defaultTeacher && defaultTeacher.webUrl ? defaultTeacher.webUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(defaultQuery)}`;
-
-      let subtopicsHtml = '';
-      (topic.subtopics || []).forEach(sub => {
-        const subIntent = sub.intentUrl || '';
-        const subWeb = sub.webUrl || '';
-        const subQuery = sub.query || `${sub.title} YKS`;
-        subtopicsHtml += `
-          <div class="subtopic-row">
-            <label class="subtopic-item ${sub.completed ? 'completed' : ''}" data-sub-id="${sub.id}">
-              <input type="checkbox" ${sub.completed ? 'checked' : ''} data-subtopic-check="${sub.id}">
-              <span>${sub.title}</span>
-            </label>
-            <button class="subtopic-yt-btn" data-yt-query="${subQuery}" data-yt-intent="${subIntent}" data-yt-web="${subWeb}" title="${sub.title} YouTube Dersi">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-            </button>
-          </div>
-        `;
-      });
-
-      let teacherChipsHtml = '';
-      (topic.teachers || []).forEach(tch => {
-        teacherChipsHtml += `
-          <span class="teacher-chip" data-yt-query="${tch.query}" data-yt-intent="${tch.intentUrl || ''}" data-yt-web="${tch.webUrl || ''}">▶ ${tch.name}</span>
-        `;
-      });
-
-      card.innerHTML = `
-        <div class="topic-header-row">
-          <div class="topic-title-wrap">
-            <span class="topic-category-badge">${topic.categoryLabel || topic.category}</span>
-            <h4>${topic.title}</h4>
-          </div>
-          <button class="yt-btn" data-yt-query="${defaultQuery}" data-yt-intent="${defaultIntent}" data-yt-web="${defaultWeb}" title="YouTube Dersi İzle">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-            <span>İzle</span>
-          </button>
-        </div>
-        <div class="subtopics-list">
-          ${subtopicsHtml}
-        </div>
-        ${teacherChipsHtml ? `<div class="teacher-chips">${teacherChipsHtml}</div>` : ''}
-      `;
-
-      container.appendChild(card);
+    const visibleSubjects = SUBJECTS_METADATA.filter(subj => {
+      if (activeTopicCategory === 'all') return true;
+      return subj.id === activeTopicCategory;
     });
 
-    // Attach checkbox handlers
+    visibleSubjects.forEach(subj => {
+      const subjectTopics = state.topicTree.filter(t => t.category === subj.id);
+      if (subjectTopics.length === 0) return;
+
+      let sTotal = 0;
+      let sCompleted = 0;
+      subjectTopics.forEach(t => {
+        (t.subtopics || []).forEach(s => {
+          sTotal++;
+          if (s.completed) sCompleted++;
+        });
+      });
+      const sPercent = sTotal > 0 ? Math.round((sCompleted / sTotal) * 100) : 0;
+      const isExpanded = (activeTopicCategory !== 'all' && activeTopicCategory === subj.id) || expandedAccordionCategories.has(subj.id);
+
+      const accordionItem = document.createElement('div');
+      accordionItem.className = `accordion-item ${isExpanded ? 'active' : ''}`;
+      accordionItem.setAttribute('data-accordion-cat', subj.id);
+
+      let cardsHtml = '';
+      subjectTopics.forEach(topic => {
+        const defaultTeacher = topic.teachers && topic.teachers[0] ? topic.teachers[0] : null;
+        const defaultQuery = defaultTeacher ? defaultTeacher.query : `${topic.title} YKS`;
+        const defaultIntent = defaultTeacher && defaultTeacher.intentUrl ? defaultTeacher.intentUrl : `vnd.youtube://results?q=${encodeURIComponent(defaultQuery)}`;
+        const defaultWeb = defaultTeacher && defaultTeacher.webUrl ? defaultTeacher.webUrl : `https://www.youtube.com/results?search_query=${encodeURIComponent(defaultQuery)}`;
+
+        let subtopicsHtml = '';
+        (topic.subtopics || []).forEach(sub => {
+          const subIntent = sub.intentUrl || '';
+          const subWeb = sub.webUrl || '';
+          const subQuery = sub.query || `${sub.title} YKS`;
+          subtopicsHtml += `
+            <div class="subtopic-row">
+              <label class="subtopic-item ${sub.completed ? 'completed' : ''}" data-sub-id="${sub.id}">
+                <input type="checkbox" ${sub.completed ? 'checked' : ''} data-subtopic-check="${sub.id}">
+                <span>${sub.title}</span>
+              </label>
+              <button class="subtopic-yt-btn" data-yt-query="${subQuery}" data-yt-intent="${subIntent}" data-yt-web="${subWeb}" title="${sub.title} YouTube Dersi">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+              </button>
+            </div>
+          `;
+        });
+
+        let teacherChipsHtml = '';
+        (topic.teachers || []).forEach(tch => {
+          teacherChipsHtml += `
+            <span class="teacher-chip" data-yt-query="${tch.query}" data-yt-intent="${tch.intentUrl || ''}" data-yt-web="${tch.webUrl || ''}">▶ ${tch.name}</span>
+          `;
+        });
+
+        cardsHtml += `
+          <div class="topic-card">
+            <div class="topic-header-row">
+              <div class="topic-title-wrap">
+                <span class="topic-category-badge">${topic.categoryLabel || subj.name}</span>
+                <h4>${topic.title}</h4>
+              </div>
+              <button class="yt-btn" data-yt-query="${defaultQuery}" data-yt-intent="${defaultIntent}" data-yt-web="${defaultWeb}" title="YouTube Dersi İzle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                <span>İzle</span>
+              </button>
+            </div>
+            <div class="subtopics-list">
+              ${subtopicsHtml}
+            </div>
+            ${teacherChipsHtml ? `<div class="teacher-chips">${teacherChipsHtml}</div>` : ''}
+          </div>
+        `;
+      });
+
+      accordionItem.innerHTML = `
+        <button class="accordion-header" data-accordion-toggle="${subj.id}">
+          <div class="accordion-header-left">
+            <span class="subject-icon">${subj.icon}</span>
+            <div>
+              <span class="subject-title">${subj.name}</span>
+              <span class="subject-subtitle">${subjectTopics.length} Ünite • ${sCompleted}/${sTotal} Kazanım</span>
+            </div>
+          </div>
+          <div class="accordion-header-right">
+            <span class="accordion-progress-badge ${sPercent === 100 ? 'done' : ''}">%${sPercent}</span>
+            <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+        </button>
+        <div class="accordion-body">
+          <div class="topic-cards-grid">
+            ${cardsHtml}
+          </div>
+        </div>
+      `;
+
+      container.appendChild(accordionItem);
+    });
+
+    // Accordion Toggle handlers
+    container.querySelectorAll('[data-accordion-toggle]').forEach(header => {
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cat = header.getAttribute('data-accordion-toggle');
+        if (expandedAccordionCategories.has(cat)) {
+          expandedAccordionCategories.delete(cat);
+        } else {
+          expandedAccordionCategories.add(cat);
+        }
+        renderTopicTree();
+      });
+    });
+
+    // Subtopic Checkbox handlers
     container.querySelectorAll('[data-subtopic-check]').forEach(chk => {
       chk.addEventListener('change', (e) => {
         const subId = e.target.getAttribute('data-subtopic-check');
@@ -975,7 +1198,7 @@
       });
     });
 
-    // Attach YouTube deep-link handlers
+    // YouTube Deep-link handlers
     container.querySelectorAll('[data-yt-query]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1612,6 +1835,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+
+  function safeOn(idOrEl, event, handler) {
+    const el = (typeof idOrEl === 'string') ? document.getElementById(idOrEl) : idOrEl;
+    if (el) el.addEventListener(event, handler);
+  }
+
     // 1. Initialize Theme (Dark / Light)
     initTheme();
 
@@ -1622,11 +1851,11 @@
     checkDeviceAuth();
 
     // 4. Passcode Modal Input Handlers
-    document.getElementById('auth-submit-btn').addEventListener('click', () => {
+    safeOn('auth-submit-btn', 'click', () => {
       const code = document.getElementById('passcode-input').value;
       verifyPasscode(code);
     });
-    document.getElementById('passcode-input').addEventListener('keydown', (e) => {
+    safeOn('passcode-input', 'keydown', (e) => {
       if (e.key === 'Enter') verifyPasscode(e.target.value);
     });
 
@@ -1644,12 +1873,12 @@
     }
 
     // 6. Dropdown Actions: Tutorial & Reset Auth
-    document.getElementById('dropdown-tutorial-btn').addEventListener('click', () => {
+    safeOn('dropdown-tutorial-btn', 'click', () => {
       if (dropdown) dropdown.classList.add('hidden');
       startTutorial();
     });
 
-    document.getElementById('dropdown-switch-role-btn').addEventListener('click', () => {
+    safeOn('dropdown-switch-role-btn', 'click', () => {
       if (confirm('Cihaz şifresini sıfırlayıp giriş ekranına dönmek istiyor musunuz?')) {
         localStorage.removeItem(AUTH_KEY);
         localStorage.removeItem(AUTH_TOKEN_KEY);
@@ -1659,21 +1888,21 @@
     });
 
     // 7. Re-trigger WOW splash on brand click
-    document.getElementById('re-trigger-splash').addEventListener('click', () => {
+    safeOn('re-trigger-splash', 'click', () => {
       launchWowSplash();
     });
-    document.getElementById('skip-splash-btn').addEventListener('click', () => {
+    safeOn('skip-splash-btn', 'click', () => {
       dismissSplash();
     });
 
     // 8. Focus Shield Toggle
-    document.getElementById('ambient-sound-toggle').addEventListener('click', () => {
+    safeOn('ambient-sound-toggle', 'click', () => {
       toggleFocusShield();
     });
 
     // 9. Voice Recognition
-    document.getElementById('voice-record-btn').addEventListener('click', toggleSpeechRecognition);
-    document.getElementById('parse-intent-btn').addEventListener('click', () => {
+    safeOn('voice-record-btn', 'click', toggleSpeechRecognition);
+    safeOn('parse-intent-btn', 'click', () => {
       const val = document.getElementById('transcript-input').value;
       parseVoiceIntent(val);
     });
@@ -1686,8 +1915,8 @@
     });
 
     // 10. Circular Pomodoro Controls & Segmented Control
-    document.getElementById('timer-start-pause-btn').addEventListener('click', startPauseTimer);
-    document.getElementById('timer-reset-btn').addEventListener('click', resetTimer);
+    safeOn('timer-start-pause-btn', 'click', startPauseTimer);
+    safeOn('timer-reset-btn', 'click', resetTimer);
     document.querySelectorAll('.seg-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         setTimerMode(btn.getAttribute('data-mode'));
@@ -1695,12 +1924,20 @@
     });
 
     // 11. Tutorial Handlers
-    document.getElementById('tutorial-next-btn').addEventListener('click', () => {
+    safeOn('tutorial-next-btn', 'click', () => {
       currentTutorialStep++;
       renderTutorialStep();
     });
-    document.getElementById('tutorial-skip-btn').addEventListener('click', closeTutorial);
-    document.getElementById('tutorial-backdrop').addEventListener('click', closeTutorial);
+    safeOn('tutorial-skip-btn', 'click', closeTutorial);
+    safeOn('tutorial-backdrop', 'click', closeTutorial);
+
+    // Workspace Subtab Buttons (Fadime Segmented View)
+    document.querySelectorAll('.ws-seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sub = btn.getAttribute('data-subtab');
+        if (sub) switchSubtab(sub);
+      });
+    });
 
     // 12. Topic Category Filter Pills
     document.querySelectorAll('#topic-category-filters .filter-pill').forEach(pill => {
@@ -1708,6 +1945,9 @@
         document.querySelectorAll('#topic-category-filters .filter-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         activeTopicCategory = pill.getAttribute('data-cat');
+        if (activeTopicCategory !== 'all') {
+          expandedAccordionCategories.add(activeTopicCategory);
+        }
         renderTopicTree();
       });
     });
@@ -1723,7 +1963,7 @@
     });
 
     // 14. S.O.S. Trigger & Resolve
-    document.getElementById('trigger-sos-btn').addEventListener('click', () => {
+    safeOn('trigger-sos-btn', 'click', () => {
       const topic = prompt('Tıkandığın ders ve konuyu yaz:', 'Türev Geometrik Yorum');
       const note = prompt('Sorundaki takıldığın noktayı kısaca belirt:', 'Teğet doğrusunun eğimi türeve eşit olduğu halde dik teğet formülünde işaret hatası yapıyorum.');
       if (topic || note) {
@@ -1737,7 +1977,7 @@
       }
     });
 
-    document.getElementById('resolve-sos-btn').addEventListener('click', () => {
+    safeOn('resolve-sos-btn', 'click', () => {
       state.users.fadime.sosActive = false;
       state.users.fadime.sosMessage = '';
       state.users.fadime.sosTopic = '';
@@ -1747,7 +1987,7 @@
     });
 
     // 15. Mentor Cheer / Encouragement
-    document.getElementById('send-cheer-btn').addEventListener('click', () => {
+    safeOn('send-cheer-btn', 'click', () => {
       const input = document.getElementById('cheer-message-input');
       const msg = input.value.trim();
       if (msg) {
@@ -1759,7 +1999,7 @@
     });
 
     // 16. Delegate Task to Fadime
-    document.getElementById('delegate-task-btn').addEventListener('click', () => {
+    safeOn('delegate-task-btn', 'click', () => {
       const title = document.getElementById('delegate-title-input').value.trim();
       const date = document.getElementById('delegate-date-input').value || new Date().toISOString().split('T')[0];
       const priority = document.getElementById('delegate-priority-select').value;
@@ -1793,7 +2033,7 @@
     });
 
     // 17. Add Sprint for Anıl
-    document.getElementById('add-sprint-btn').addEventListener('click', () => {
+    safeOn('add-sprint-btn', 'click', () => {
       const input = document.getElementById('new-sprint-input');
       const val = input.value.trim();
       if (val) {
@@ -1805,10 +2045,10 @@
     });
 
     // 18. Modals (New Task & Mistake)
-    document.getElementById('open-new-task-modal-btn').addEventListener('click', () => {
+    safeOn('open-new-task-modal-btn', 'click', () => {
       document.getElementById('add-task-modal-overlay').classList.remove('hidden');
     });
-    document.getElementById('add-mistake-btn').addEventListener('click', () => {
+    safeOn('add-mistake-btn', 'click', () => {
       document.getElementById('add-mistake-modal-overlay').classList.remove('hidden');
     });
     document.querySelectorAll('.close-modal-btn, [data-close]').forEach(btn => {
@@ -1819,7 +2059,7 @@
     });
 
     // Save Task from modal
-    document.getElementById('save-new-task-btn').addEventListener('click', () => {
+    safeOn('save-new-task-btn', 'click', () => {
       const title = document.getElementById('task-title-input').value.trim();
       const forUser = document.getElementById('task-for-select').value;
       const priority = document.getElementById('task-priority-select').value;
@@ -1851,7 +2091,7 @@
     });
 
     // Save Mistake note
-    document.getElementById('save-mistake-btn').addEventListener('click', () => {
+    safeOn('save-mistake-btn', 'click', () => {
       const topic = document.getElementById('mistake-topic-input').value.trim();
       const note = document.getElementById('mistake-note-input').value.trim();
 
@@ -1872,18 +2112,18 @@
     });
 
     // Celebration Modal Close
-    document.getElementById('close-celebration-btn').addEventListener('click', () => {
+    safeOn('close-celebration-btn', 'click', () => {
       document.getElementById('celebration-modal-overlay').classList.add('hidden');
     });
 
     // Backup & Restore
-    document.getElementById('export-json-btn').addEventListener('click', exportDataAsJSON);
-    document.getElementById('import-json-input').addEventListener('change', (e) => {
+    safeOn('export-json-btn', 'click', exportDataAsJSON);
+    safeOn('import-json-input', 'change', (e) => {
       if (e.target.files && e.target.files[0]) {
         importDataFromJSON(e.target.files[0]);
       }
     });
-    document.getElementById('reset-data-btn').addEventListener('click', () => {
+    safeOn('reset-data-btn', 'click', () => {
       if (confirm('Tüm ilerleme verilerini sıfırlayıp fabrika ayarlarına dönmek istediğinize emin misiniz?')) {
         state.topicTree = (typeof YKS_CURRICULUM !== 'undefined') ? JSON.parse(JSON.stringify(YKS_CURRICULUM)) : [];
         state.tasks = JSON.parse(JSON.stringify(INITIAL_TASKS));

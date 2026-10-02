@@ -55,20 +55,16 @@
           </svg>
         </div>
         <h2>TulpiFlow Giriş</h2>
-        <p>Anıl ve Fadime için asimetrik odak alanı. İlk açılış olduğu için tek seferlik cihaz şifrenizi girin. Bu cihazda oturumunuz kalıcı olarak hatırlanacaktır.</p>
+        <p>Güvenli ve odaklı çalışma alanı. Oturumunuz bu cihazda kalıcı olarak hatırlanacaktır.</p>
       </div>
       
       <div class="auth-form">
-        <label for="passcode-input">Cihaz Giriş Şifresi</label>
+        <label for="passcode-input">Cihaz PIN / Parola</label>
         <div class="input-with-icon">
-          <input type="password" id="passcode-input" placeholder="••••••••" autocomplete="off" spellcheck="false">
+          <input type="password" id="passcode-input" placeholder="Parola girin" autocomplete="off" spellcheck="false">
           <button id="auth-submit-btn" class="primary-btn">Giriş Yap</button>
         </div>
-        <div id="auth-error-msg" class="auth-error hidden">Geçersiz şifre! Size iletilen şifreyi girin (7799 / 2026).</div>
-        
-        <div class="auth-hint-box">
-          <span>Şifreler: <strong>7799</strong> (Anıl - Mentör) | <strong>2026</strong> (Fadime - YKS)</span>
-        </div>
+        <div id="auth-error-msg" class="auth-error hidden">Geçersiz şifre. Lütfen tekrar deneyin.</div>
       </div>
     </div>
   </div>
@@ -83,8 +79,8 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         </div>
         <div>
-          <h3>Yeni Özellikler Geldi</h3>
-          <p id="update-version-label" class="update-ver-tag">v1.2.0 Hazır</p>
+          <h3>Yeni Güncelleme Mevcut</h3>
+          <p id="update-version-label" class="update-ver-tag">v1.3.0 Hazır</p>
         </div>
       </div>
       <div class="update-body">
@@ -92,9 +88,22 @@
         <ul id="update-changelog-list" class="changelog-list">
           <!-- Populated dynamically -->
         </ul>
-        <div class="update-actions">
+
+        <!-- In-App Download Progress Bar -->
+        <div id="update-download-progress-wrap" class="update-progress-wrap hidden">
+          <div class="progress-labels">
+            <span id="update-progress-status">APK İndiriliyor...</span>
+            <span id="update-progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="update-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <p class="update-progress-subtext" id="update-progress-subtext">Paket indiriliyor, lütfen bekleyin...</p>
+        </div>
+
+        <div class="update-actions" id="update-actions-wrap">
           <button id="update-later-btn" class="secondary-btn">Daha Sonra</button>
-          <a id="update-download-btn" href="#" target="_blank" class="primary-btn">Güncellemeyi Al</a>
+          <button id="update-download-btn" class="primary-btn">Güncellemeyi İndir & Kur</button>
         </div>
       </div>
     </div>
@@ -213,9 +222,26 @@
           <button id="resolve-sos-btn" class="secondary-btn btn-sm">Çözüldü İşaretle</button>
         </div>
 
-        <!-- Hero Row: Circular Pomodoro & Natural Language Voice Input -->
-        <div class="grid-2-col">
-          
+        <!-- Fadime Segmented Sub-Navigation (About Face Anti-Doom-Scrolling Architecture) -->
+        <div class="workspace-segmented-bar" id="fadime-subtabs-bar">
+          <button class="ws-seg-btn active" data-subtab="focus">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Odak & Sayaç</span>
+          </button>
+          <button class="ws-seg-btn" data-subtab="curriculum">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>YKS Müfredatı</span>
+          </button>
+          <button class="ws-seg-btn" data-subtab="tasks-notes">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span>Koç & Notlar</span>
+          </button>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- SUBPANE 1: ODAK & SAYAÇ                                             -->
+        <!-- =================================================================== -->
+        <div id="subpane-focus" class="subpane active">
           <!-- Fadime Circular Pomodoro Card -->
           <div class="focus-card elevation-card" id="timer-card-target">
             <div class="card-header">
@@ -273,10 +299,54 @@
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- Coach Tasks & Voice Recognition Card -->
-          <div class="column-card-stack">
-            
+        <!-- =================================================================== -->
+        <!-- SUBPANE 2: YKS MÜFREDATI (COLLAPSIBLE ACCORDION ENGINE)              -->
+        <!-- =================================================================== -->
+        <div id="subpane-curriculum" class="subpane hidden">
+          <div class="topic-tree-section elevation-card" id="topic-tree-target">
+            <div class="section-top">
+              <div>
+                <h3 class="section-title">YKS (TYT/AYT) Müfredatı & YouTube Ders Motoru</h3>
+                <p class="section-desc">Ders seçerek üniteleri ve YouTube derslerini akordeon panelinden inceleyin.</p>
+              </div>
+              <div class="filter-pills" id="topic-category-filters">
+                <button class="filter-pill active" data-cat="all">Tümü</button>
+                <button class="filter-pill" data-cat="tyt-turkce">TYT Türkçe</button>
+                <button class="filter-pill" data-cat="tyt-sosyal">TYT Sosyal</button>
+                <button class="filter-pill" data-cat="tyt-matematik">TYT Mat & Geo</button>
+                <button class="filter-pill" data-cat="tyt-fen">TYT Fen</button>
+                <button class="filter-pill" data-cat="ayt-matematik">AYT Mat & Geo</button>
+                <button class="filter-pill" data-cat="ayt-fizik">AYT Fizik</button>
+                <button class="filter-pill" data-cat="ayt-kimya">AYT Kimya</button>
+                <button class="filter-pill" data-cat="ayt-biyoloji">AYT Biyoloji</button>
+              </div>
+            </div>
+
+            <!-- Master Progress Bar -->
+            <div class="master-progress-wrapper">
+              <div class="progress-labels">
+                <span>Müfredat İlerleme Oranı</span>
+                <span id="topic-percentage-label" class="percentage-value">0%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div id="topic-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Dynamic Accordion Curriculum Container -->
+            <div class="accordion-curriculum-container" id="topic-cards-container">
+              <!-- Rendered dynamically by app.js as 8 collapsible accordion subject modules -->
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- SUBPANE 3: KOÇ GÖREVLERİ & NOTLAR                                   -->
+        <!-- =================================================================== -->
+        <div id="subpane-tasks-notes" class="subpane hidden">
+          <div class="grid-2-col">
             <!-- Assigned Tasks from Mentor Anıl (⭐ Koç Görevleri) -->
             <div class="coach-tasks-card elevation-card" id="mentor-tasks-target">
               <div class="card-header">
@@ -319,59 +389,21 @@
                 <button class="speech-chip" data-phrase="Trigonometri toplam fark formülleri tamamladım">"Trigonometri formülleri tamamladım"</button>
               </div>
             </div>
-
-          </div>
-        </div>
-
-        <!-- Comprehensive YKS Topic Tree with YouTube Teacher Deep-Linking -->
-        <div class="topic-tree-section elevation-card" id="topic-tree-target">
-          <div class="section-top">
-            <div>
-              <h3 class="section-title">YKS (TYT/AYT) Müfredatı & YouTube Ders Motoru</h3>
-              <p class="section-desc">Her ders ve alt konunun yanındaki YouTube butonuna tıklayarak doğrudan Eyüp B., Mert Hoca, Kenan Kara, VIP Fizik, Görkem Şahin, Dr. Biyoloji, Rüştü Hoca ve Mehmet Celal Özyıldız derslerine geçiş yapabilirsiniz.</p>
-            </div>
-            <div class="filter-pills" id="topic-category-filters">
-              <button class="filter-pill active" data-cat="all">Tümü</button>
-              <button class="filter-pill" data-cat="tyt-turkce">TYT Türkçe</button>
-              <button class="filter-pill" data-cat="tyt-sosyal">TYT Sosyal</button>
-              <button class="filter-pill" data-cat="tyt-matematik">TYT Mat & Geo</button>
-              <button class="filter-pill" data-cat="tyt-fen">TYT Fen</button>
-              <button class="filter-pill" data-cat="ayt-matematik">AYT Mat & Geo</button>
-              <button class="filter-pill" data-cat="ayt-fizik">AYT Fizik</button>
-              <button class="filter-pill" data-cat="ayt-kimya">AYT Kimya</button>
-              <button class="filter-pill" data-cat="ayt-biyoloji">AYT Biyoloji</button>
-            </div>
           </div>
 
-          <!-- Master Progress Bar -->
-          <div class="master-progress-wrapper">
-            <div class="progress-labels">
-              <span>Müfredat İlerleme Oranı</span>
-              <span id="topic-percentage-label" class="percentage-value">0%</span>
+          <!-- Hata Defteri & Boş Bırakılanlar -->
+          <div class="mistake-notebook-section elevation-card" style="margin-top: 14px;">
+            <div class="section-top">
+              <div>
+                <h3 class="section-title">Hata Defteri & Takıldığım Sorular</h3>
+                <p class="section-desc">Denemelerde yapılamayan soruları not alın; mentörünüzle haftalık analizde incelenecektir.</p>
+              </div>
+              <button id="add-mistake-btn" class="secondary-btn btn-sm">+ Yeni Soru Kaydı Ekle</button>
             </div>
-            <div class="progress-bar-bg">
-              <div id="topic-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+
+            <div class="mistake-list" id="mistake-list-container">
+              <!-- Rendered by app.js -->
             </div>
-          </div>
-
-          <!-- Dynamic Topic Grid -->
-          <div class="topic-cards-grid" id="topic-cards-container">
-            <!-- Rendered dynamically by app.js from curriculum.js -->
-          </div>
-        </div>
-
-        <!-- Hata Defteri & Boş Bırakılanlar -->
-        <div class="mistake-notebook-section elevation-card">
-          <div class="section-top">
-            <div>
-              <h3 class="section-title">Hata Defteri & Takıldığım Sorular</h3>
-              <p class="section-desc">Denemelerde yapılamayan soruları not alın; mentörünüzle haftalık analizde incelenecektir.</p>
-            </div>
-            <button id="add-mistake-btn" class="secondary-btn btn-sm">+ Yeni Soru Kaydı Ekle</button>
-          </div>
-
-          <div class="mistake-list" id="mistake-list-container">
-            <!-- Rendered by app.js -->
           </div>
         </div>
 
